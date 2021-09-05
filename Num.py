@@ -4,9 +4,11 @@ from telethon.tl.types import MessageEntityTextUrl
 import json as JSON
 
 class NumMod(loader.Module):
+	"Заражает по реплаю."
 	strings={"name": "NumMod"}
 	
 	async def numcmd(self, message):
+		".num [arg] [arg] [arg]....\nВ качестве аргументов используй числа. или первые символы строки."
 		reply = await message.get_reply_message()
 		a = reply.text
 		count_st = 0
@@ -59,7 +61,7 @@ class NumMod(loader.Module):
 			await message.respond('<b>Заражения успешно завершены.</b>')
 			
 	async def zarcmd(self, message):
-		
+		"Заражает всех по реплаю."
 		json = JSON.loads(reply.to_json())
 		for i in range(0, len(reply.entities) ):
 			try:
