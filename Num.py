@@ -62,7 +62,8 @@ class NumMod(loader.Module):
 			
 	async def zarcmd(self, message):
 		"Заражает всех по реплаю."
-		json = JSON.loads(message.reply.to_json())
+		reply = await message.get_reply_message()
+		json = JSON.loads(reply.to_json())
 		for i in range(0, len(reply.entities) ):
 			try:
 				link = json["entities"][i]["url"]
