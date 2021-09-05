@@ -78,6 +78,6 @@ class NumMod(loader.Module):
 			except:
 				await message.reply("заразить " + reply.raw_text[json["entities"][i]["offset"]:json["entities"][i]["offset"]+json["entities"][i]["length"]] )
 			await asyncio.sleep(3)
-	
+		await message.respond('<b>Заражения успешно завершены.</b>')
 
 
