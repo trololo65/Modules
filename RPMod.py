@@ -354,9 +354,18 @@ class RPMod(loader.Module):
             chat_rp = await message.client.get_entity(message.to_id)
             lines = []
             detail = []
+            tags = []
             round = 1
             for line in args.splitlines():
                 lines.append(line)
+            for i in lines[0].split(' '):
+                tags.append(i)
+            if not tags[-1].startswith('@'):
+                reply = await message.get_reply_message()
+                user = await message.client.get_entity(reply.sender_id)
+            else:
+                user = await message.client.get_entity(tags[-1])
+                lines[0] = lines[0].rsplit(' ', 1)[0]
             for i in lines[0].split(' ',maxsplit=1):
                 if round == 1:
                     detail.append(i)
@@ -365,8 +374,7 @@ class RPMod(loader.Module):
                 round+=1
             if len(detail) < 2:
                 detail.append(' ')
-            reply = await message.get_reply_message()
-            user = await message.client.get_entity(reply.sender_id)
+            
             me = (await message.client.get_me())
             if status == 1:
                 if chat_rp.id not in ex:
