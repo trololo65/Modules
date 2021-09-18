@@ -45,8 +45,8 @@ class NumMod(loader.Module):
 							await message.reply(f'заразить @{list[1]}')
 						elif link.startswith('https://t.me'):
 							a ='@' + str(link.split('/')[3])
-							b = await message.client.get_entity(a)
-							await message.reply(f'заразить @{b.id}')
+							
+							await message.reply(f'заразить {a}')
 						else:
 							await message.reply('что за хуета?')
 			await asyncio.sleep(3)
@@ -74,8 +74,8 @@ class NumMod(loader.Module):
 					await message.reply('заразить @' + list[1])
 				elif link.startswith('https://t.me'):
 					a ='@' + str(link.split('/')[3])
-					b = await message.client.get_entity(a)
-					await message.reply(f'заразить @{b.id}')
+							
+					await message.reply(f'заразить {a}')
 				else:
 					await message.reply('что за хуета?')
 			except:
