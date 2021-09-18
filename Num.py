@@ -57,7 +57,7 @@ class NumMod(loader.Module):
 		elif not count_hf:
 			await message.edit('Не найдено ни одной ссылки.')
 			
-		else:
+		elif len(list_args) >= 3:
 			await message.respond('<b>Заражения успешно завершены.</b>')
 			
 	async def zarcmd(self, message):
