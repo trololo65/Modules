@@ -155,7 +155,7 @@ class RPMod(loader.Module):
                 self.db.set("RPMod", "rprezjim", 2)
                 await message.edit("<b>RP Режим изменён на <code>отправку смс.</code></b>")
             else:
-                self.db.set("RPMod", "rprezjim", 1)
+                self.db.set("RPMod", "rprezjim", 1.)
                 await message.edit("<b>RP Режим изменён на <code>изменение смс.</code></b>")
         else:  	
             await message.edit('Что то не так.. ')
@@ -364,7 +364,13 @@ class RPMod(loader.Module):
                 reply = await message.get_reply_message()
                 user = await message.client.get_entity(reply.sender_id)
             else:
-                user = await message.client.get_entity(tags[-1])
+                if not tags[-1][1:].isdigit():
+                
+                    user = await message.client.get_entity(tags[-1])
+                    
+                
+                else:
+                    user = await message.client.get_entity(int(tags[-1][1:]))
                 lines[0] = lines[0].rsplit(' ', 1)[0]
             for i in lines[0].split(' ',maxsplit=1):
                 if round == 1:
