@@ -194,8 +194,8 @@ class SeeChatMod(loader.Module):
                                 if message.sender_id == me.id:
                                     return
                                 try:
-                                    await message.client.send_message(chat.id, f"<b>Видео от</b> <a href='tg://user?id={user.id}'>{user.first_name}</a>:")
                                     await message.forward_to(chat.id)
+                                    await message.client.send_message(chat.id, f"<b>Видео сверху от</b> <a href='tg://user?id={user.id}'>{user.first_name}</a>.")
                                 except:
                                     file = message.file.name if message.file.name else "huita" + message.file.ext
                                     await message.download_media(file)
