@@ -351,6 +351,7 @@ class RPMod(loader.Module):
             ex = self.db.get("RPMod", "exlist")
 
             args = message.text.lower()
+            me = (await message.client.get_me())
             chat_rp = await message.client.get_entity(message.to_id)
             lines = []
             detail = []
@@ -364,14 +365,13 @@ class RPMod(loader.Module):
                 reply = await message.get_reply_message()
                 user = await message.client.get_entity(reply.sender_id)
             else:
-                if not tags[-1][1:].isdigit():
-                
-                    user = await message.client.get_entity(tags[-1])
-                    
-                
-                else:
-                    user = await message.client.get_entity(int(tags[-1][1:]))
-                lines[0] = lines[0].rsplit(' ', 1)[0]
+                if tags[0] in comand:
+                    if message.sender_id == me.id:
+                        if not tags[-1][1:].isdigit():
+                            user = await message.client.get_entity(tags[-1])
+                        else:
+                            user = await message.client.get_entity(int(tags[-1][1:]))
+                        lines[0] = lines[0].rsplit(' ', 1)[0]
             for i in lines[0].split(' ',maxsplit=1):
                 if round == 1:
                     detail.append(i)
@@ -381,7 +381,7 @@ class RPMod(loader.Module):
             if len(detail) < 2:
                 detail.append(' ')
             
-            me = (await message.client.get_me())
+            
             if status == 1:
                 if chat_rp.id not in ex:
                     if message.sender_id == me.id:
