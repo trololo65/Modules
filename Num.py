@@ -13,23 +13,29 @@ class NumMod(loader.Module):
 		a = reply.text
 		count_st = 0
 		count_hf = 0
-		if not a:
+		if not reply:
 			await message.edit('Нет реплая.')
 			return
 		args = utils.get_args_raw(message)
 		list_args=[]
-		for i in args.split(' '):
-			list_args.append(i)
 		if not args:
 			await message.edit('Нет аргументов')
 			return
+		for i in args.split(' '):
+			if '-' in i:
+				ot_do = i.split('-')
+				try:
+					for x in range(int(ot_do[0]),int(ot_do[1])+1):
+						list_args.append(str(x))
+				except:
+					await message.respond('Используй правильно функцию "от-до"')
+					return
+			else:
+				list_args.append(i)
 		lis = []
 		for i in a.splitlines():
 			lis.append(i)
 		for start in list_args:
-			if start.isdigit():
-				if not start[:-1] == '.':
-					start+='.'
 			for x in lis:
 				if x.lower().startswith(str(start.lower())):
 					count_st = 1
@@ -43,12 +49,14 @@ class NumMod(loader.Module):
 							for i in link.split('='):
 								list.append(i)
 							await message.reply(f'заразить @{list[1]}')
+							break
 						elif link.startswith('https://t.me'):
 							a ='@' + str(link.split('/')[3])
-							
 							await message.reply(f'заразить {a}')
+							break
 						else:
 							await message.reply('что за хуета?')
+							break
 			await asyncio.sleep(3)
 				
 		if not count_st:
