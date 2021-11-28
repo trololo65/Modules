@@ -70,7 +70,7 @@ class glitchMod(loader.Module):
 		args = utils.get_args_raw(message)
 		glitch_opt = ["frames", "step", "duration", "loop"]
 		if not args:
-			message = await utils.answer(message, f"Доступные настройки:\n• <code>{glitch_opt[0]}</code> --- количество кадров.\n• <code>{glitch_opt[1]}</code> --- количество кадров без глюка(значение 1 ставит все кадры с глюком).\n• <code>{glitch_opt[2]}</code> --- длительность кадра.\n• <code>{glitch_opt[3]}</code> --- количество зацикливаний(значение 0 бесконечно зацикливает).\n\nИспользовать так:\noption = value")
+			message = await utils.answer(message, f"Доступные настройки:\n• <code>{glitch_opt[0]}</code> --- количество кадров.\n• <code>{glitch_opt[1]}</code> --- количество кадров без глюка(значение 1 ставит все кадры с глюком).\n• <code>{glitch_opt[2]}</code> --- длительность кадра(в миллисекундах).\n• <code>{glitch_opt[3]}</code> --- количество зацикливаний(значение 0 бесконечно зацикливает).\n\nИспользовать так:\noption = value")
 			return
 		args = [ i for i in args.split('=')]
 		
