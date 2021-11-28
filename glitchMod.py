@@ -41,7 +41,7 @@ class glitchMod(loader.Module):
 		if not reply and not args:
 			message = await utils.answer(message, f'Аргументы:\n• <code>{args_glitch[0]}</code>  --- возвращает изображение как гифку. \n• <code>{args_glitch[1]}</code>  --- добавляет эффект смещения цвета. \n• <code>{args_glitch[2]}</code>  --- добавляет эффект линий.')
 			return
-		if not reply.photo:
+		if not reply.photo and not reply.sticker:
 			message = await utils.answer(message, 'Реплай должен быть на фото.')
 			return
 		if args:
