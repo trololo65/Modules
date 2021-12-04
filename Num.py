@@ -7,10 +7,16 @@ class NumMod(loader.Module):
 	"Заражает по реплаю."
 	strings={"name": "NumMod"}
 	
+	async def client_ready(self, client, db):
+		self.db = db
+		if not self.db.get("NumMod", "exUsers", False):
+			self.db.set("NumMod", "exUsers", [])
+		
 	async def numcmd(self, message):
 		".num [arg] [arg] [arg]....\nВ качестве аргументов используй числа. или первые символы строки."
 		reply = await message.get_reply_message()
 		a = reply.text
+		exlist = self.db.get("NumMod", "exUsers")
 		count_st = 0
 		count_hf = 0
 		if not reply:
@@ -32,9 +38,7 @@ class NumMod(loader.Module):
 					return
 			else:
 				list_args.append(i)
-		lis = []
-		for i in a.splitlines():
-			lis.append(i)
+		lis = a.splitlines()
 		for start in list_args:
 			for x in lis:
 				if x.lower().startswith(str(start.lower())):
@@ -45,14 +49,18 @@ class NumMod(loader.Module):
 						c=x.find('">')
 						link = x[b:c]
 						if link.startswith('tg'):
-							list = []
-							for i in link.split('='):
-								list.append(i)
-							await message.reply(f'заразить @{list[1]}')
+							list = '@' + link.split('=')[1]
+							if list in exlist:
+								await message.reply(f'Исключение: <code>{list}</code>')
+							else:
+								await message.reply(f'заразить {list}')
 							break
 						elif link.startswith('https://t.me'):
 							a ='@' + str(link.split('/')[3])
-							await message.reply(f'заразить {a}')
+							if a in exlist:
+								await message.reply(f'Исключение: <code>{a}</code>')
+							else:
+								await message.reply(f'заразить {a}')
 							break
 						else:
 							await message.reply('что за хуета?')
@@ -71,24 +79,62 @@ class NumMod(loader.Module):
 	async def zarcmd(self, message):
 		"Заражает всех по реплаю."
 		reply = await message.get_reply_message()
+		exlist = self.db.get("NumMod", "exUsers")
+		if not reply:
+			await message.edit('Нет реплая.')
+			return
 		json = JSON.loads(reply.to_json())
 		for i in range(0, len(reply.entities) ):
 			try:
 				link = json["entities"][i]["url"]
 				if link.startswith('tg'):
-					list = []
-					for i in link.split('='):
-						list.append(i)
-					await message.reply('заразить @' + list[1])
+					list = '@' + link.split('=')[1]
+					if list in exlist:
+						await message.reply(f'Исключение: <code>{list}</code>')
+					else:
+						await message.reply('заразить ' + list)
 				elif link.startswith('https://t.me'):
 					a ='@' + str(link.split('/')[3])
-							
-					await message.reply(f'заразить {a}')
+					if a in exlist:
+						await message.reply(f'Исключение: <code>{a}</code>')
+					else:
+						await message.reply(f'заразить {a}')
 				else:
 					await message.reply('что за хуета?')
 			except:
 				await message.reply("заразить " + reply.raw_text[json["entities"][i]["offset"]:json["entities"][i]["offset"]+json["entities"][i]["length"]] )
 			await asyncio.sleep(3)
 		await message.respond('<b>Заражения успешно завершены.</b>')
-
-
+		
+	async def exnumcmd(self, message):
+		"Добавляет исключения в модуль.\nИспользуй: .exnum {@user/@id}"
+		args = utils.get_args_raw(message)
+		exlistGet = self.db.get("NumMod", "exUsers")
+		exlist = exlistGet.copy()
+		if not args:
+			if len(exlist) < 1:
+				await message.edit('Список исключений пуст.')
+				return
+			exsms = ''
+			count = 0
+			for i in exlist:
+				count+=1
+				exsms+=f'<b>{count}.</b> <code>{i}</code>\n'
+			message = await utils.answer(message, exsms)
+			return
+		if args == 'clear':
+			exlist.clear()
+			self.db.set("NumMod", "exUsers", exlist)
+			await message.edit('Список исключений очистен.')
+			return
+		if len(args.split(' ')) > 1 or args[0] != '@':
+			await message.edit('Количество аргументов <b>больше</b> одного, либо начинается <b>не</b> со знака <code>@</code>')
+			return
+		if args in exlist:
+			exlist.remove(args)
+			self.db.set("NumMod", "exUsers", exlist)
+			await message.edit(f'Пользователь <code>{args}</code> исключён.')
+			return
+		exlist.append(args)
+		self.db.set("NumMod", "exUsers", exlist)
+		await message.edit(f'Пользователь <code>{args}</code> добавлен.')
