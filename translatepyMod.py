@@ -68,7 +68,7 @@ class translatepyMod(loader.Module):
 
 		res = t.translate(text,lng) # result translate
 
-		await utils.answer(message, f'<b>[{res.service}: {res.source_language}->{lng}</b>\n<code>{res.result}</code>')
+		await utils.answer(message, f'<b>[{res.service}: {res.source_language}->{lng}]</b>\n<code>{res.result}</code>')
 
 	async def tservicecmd(self, message):
 		""" Установка сервиса для перевода.\nИспользуй .tservice list для просмотра всех сервисов"""
