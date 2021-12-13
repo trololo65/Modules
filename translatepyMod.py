@@ -73,9 +73,9 @@ class translatepyMod(loader.Module):
 		""" Установка сервиса для перевода.\nИспользуй .tservice list для просмотра всех сервисов"""
 		args = utils.get_args_raw(message)
 		sL = self.db.get('translatepy', 'services') #serviceList
-		service = list(sL.keys())[list(sL.values()).index(True)] # Поиск установленного сервера
+		service = str(list(sL.keys())[list(sL.values()).index(True)]) # Поиск установленного сервера
 		if not args:
-			await utils.answer(message, f'<b>Установка:</b> <code>.tservise [сервис]</code>\n<b>Сервис:</b> <code>{service}</code>')
+			await utils.answer(message, f'<b>Установка:</b> <code>.tservise \{сервис\}</code>\n<b>Сервис:</b> <code>{service}</code>')
 		elif args == 'list':
 			await utils.answer(message, f'<b>Достуные сервисы:</b>\n<code>Google</code>\n<code>Bing</code>\n<code>Yandex</code>\n<code>Reverso</code>\n<code>Deepl</code>\n<code>Libre</code>\n<code>TransalteCom</code>\n<code>MyMemory</code>')
 		elif args.lower() in sL:
