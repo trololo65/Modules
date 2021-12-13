@@ -24,6 +24,7 @@ class translatepyMod(loader.Module):
 	strings = {'name': 'translatepy'}
 	
 	async def client_ready(self, client, db):
+		self.db = db
 		if not self.db.get('translatepy', 'services', False):
 			self.db.set('translatepy', 'services', {'google': True, 'bing': False, 'yandex': False, 'reverso': False, 'libre': False, 'translatecom': False, 'deepl': False, 'mymemory': False,})
 
