@@ -33,7 +33,7 @@ class translatepyMod(loader.Module):
 		
 		args = utils.get_args_raw(message)
 		reply = await message.get_reply_message()
-		args_list = args.split(' ')
+		args_list = args.split(' ', maxsplit = 1)
 		sL = self.db.get('translatepy', 'services') #serviceList
 		if not args:
 			await utils.answer(message, 'Где аргументы?')
