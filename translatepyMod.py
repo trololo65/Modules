@@ -78,7 +78,7 @@ class translatepyMod(loader.Module):
 		if not args:
 			await utils.answer(message, '<b>Установка:</b> <code>.tservise {сервис}</code>'+f'\n<b>Сервис:</b> <code>{service}</code>')
 		elif args == 'list':
-			await utils.answer(message, '<b>Достуные сервисы:</b>\n<code>Google</code>\n<code>Bing</code>\n<code>Yandex</code>\n<code>Reverso</code>\n<code>Deepl</code>\n<code>Libre</code>\n<code>TransalteCom</code>\n<code>MyMemory</code>')
+			await utils.answer(message, '<b>Достуные сервисы:</b>\n<code>Google</code>\n<code>Bing</code>\n<code>Yandex</code>\n<code>Reverso</code>\n<code>Deepl</code>\n<code>Libre</code>\n<code>TranslateCom</code>\n<code>MyMemory</code>')
 		elif args.lower() in sL:
 			for key, value in sL.items(): # Переборка словаря
 				sL[key] = False # Установка всех значений на False
