@@ -66,7 +66,7 @@ class translatepyMod(loader.Module):
 		else:
 			t = Translator()
 
-		res = t(text,lng) # result translate
+		res = t.translate(text,lng) # result translate
 
 		await utils.answer(message, f'<b>[{res.service}: {res.source_language}->{lng}</b>\n<code>{res.result}</code>')
 
