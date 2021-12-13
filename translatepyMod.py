@@ -56,7 +56,7 @@ class translatepyMod(loader.Module):
 		elif sL['reverso']:
 			t = ReversoTranslate()
 		elif sL['deepl']:
-			t = Deeplranslate()
+			t = DeeplTranslate()
 		elif sL['libre']:
 			t = LibreTranslate()
 		elif sL['translatecom']:
