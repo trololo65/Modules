@@ -46,24 +46,11 @@ class translatepyMod(loader.Module):
 		else:
 			text = args_list[1]
 		lng = args_list[0]
-
-		if sL['google']:
-			t = GoogleTranslate() #translate
-		elif sL['yandex']:
-			t = YandexTranslate()
-		elif sL['bing']:
-			t = BingTranslate()
-		elif sL['reverso']:
-			t = ReversoTranslate()
-		elif sL['deepl']:
-			t = DeeplTranslate()
-		elif sL['libre']:
-			t = LibreTranslate()
-		elif sL['translatecom']:
-			t = TranslateComTranslate()
-		elif sL['mymemory']:
-			t = MyMemoryTranslate()
-		else:
+		sL_class = {'google': GoogleTranslate(), 'yandex': YandexTranslate(), 'bing': BingTranslate(), 'reverso': ReversoTranslate(), 'deepl': DeeplTranslate(), 'libre': LibreTranslate(), 'translatecom': TranslateComTranslate(), 'mymemory': MyMemoryTranslate()}
+		try:
+			sL_active = str(list(sL.keys())[list(sL.values()).index(True)]) # Поиск установленного сервера
+			t = sL_class[sL_active]
+		except:
 			t = Translator()
 
 		res = t.translate(text,lng) # result translate
@@ -76,7 +63,7 @@ class translatepyMod(loader.Module):
 		sL = self.db.get('translatepy', 'services') #serviceList
 		service = str(list(sL.keys())[list(sL.values()).index(True)]) # Поиск установленного сервера
 		if not args:
-			await utils.answer(message, '<b>Установка:</b> <code>.tservise {сервис}</code>'+f'\n<b>Сервис:</b> <code>{service}</code>')
+			await utils.answer(message, '<b>Установка:</b> <code>.tservice {сервис}</code>'+f'\n<b>Сервис:</b> <code>{service}</code>')
 		elif args == 'list':
 			await utils.answer(message, '<b>Достуные сервисы:</b>\n<code>Google</code>\n<code>Bing</code>\n<code>Yandex</code>\n<code>Reverso</code>\n<code>Deepl</code>\n<code>Libre</code>\n<code>TranslateCom</code>\n<code>MyMemory</code>')
 		elif args.lower() in sL:
