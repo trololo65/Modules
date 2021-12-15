@@ -156,7 +156,7 @@ class NumMod(loader.Module):
 				return
 			sms = ''
 			for key, value in infList.items():
-				sms+=f'<b>• <code>{key}</code> -- {value[0]}К [<i>{value[1]}</i>]</b>\n'
+				sms+=f'<b>• <code>{key}</code> -- {value[0]} [<i>{value[1]}</i>]</b>\n'
 			await utils.answer(message, sms)
 			return
 		if args_list[0] == "clear":
@@ -165,6 +165,9 @@ class NumMod(loader.Module):
 			await utils.answer(message, "Лист заражений <b>очищен</b>.")
 		elif args_list[0][0] != '@':
 			await utils.answer(message, 'Это не <b>@ид/юзер</b>.')
+		elif len(args_list) == 1 and args_list[0] in infList and '-f' in args.lower():
+			user = infList[args_list[0]]
+			await utils.answer(message, f"<b>• <code>{args_list[0]}</code> -- {user[0]} [<i>{user[1]}</i>]</b>")
 		elif len(args_list) == 1 and args_list[0] in infList:
 			infList.pop(args_list[0])
 			self.db.set("NumMod", "infList", infList)
@@ -177,6 +180,9 @@ class NumMod(loader.Module):
 				return
 			timezone = "Europe/Kiev"
 			vremya = datetime.now(pytz.timezone(timezone)).strftime("%d.%m")
-			infList[user] = [count, vremya]
+			k = ''
+			if '-k' in args.lower():
+				k+='k'
+			infList[user] = [str(count)+k, vremya]
 			self.db.set("NumMod", "infList", infList)
-			await utils.answer(message, f"Пользователь <code>{user}</code> добавлен в список заражений.\nЧисло: <code>{count}</code>\nДата: <b>{vremya}</b>")
+			await utils.answer(message, f"Пользователь <code>{user}</code> добавлен в список заражений.\nЧисло: <code>{count}</code>{k}\nДата: <b>{vremya}</b>")
