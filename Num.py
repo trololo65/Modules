@@ -156,7 +156,7 @@ class NumMod(loader.Module):
 				return
 			sms = ''
 			for key, value in infList.items():
-				sms+=f'<b>• <code>{key}</code> -- {value[0]} [<i>{value[1]}</i>]</b>\n'
+				sms+=f'<b>• <code>{key}</code> -- <code>{value[0]}</code> [<i>{value[1]}</i>]</b>\n'
 			await utils.answer(message, sms)
 			return
 		if args_list[0] == "clear":
