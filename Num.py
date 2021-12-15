@@ -166,8 +166,6 @@ class NumMod(loader.Module):
 				infList.clear()
 				self.db.set("NumMod", "infList", infList)
 				await utils.answer(message, "Лист заражений <b>очищен</b>.")
-			elif args_list[0][0] != '@':
-				await utils.answer(message, 'Это не <b>@ид/юзер</b>.')
 			elif args_list[0] in infList and '-f' in args.lower():
 				user = infList[args_list[0]]
 				await utils.answer(message, f"<b>• <code>{args_list[0]}</code> -- {user[0]} [<i>{user[1]}</i>]</b>")
@@ -175,6 +173,8 @@ class NumMod(loader.Module):
 				infList.pop(args_list[0])
 				self.db.set("NumMod", "infList", infList)
 				await utils.answer(message, f"Пользователь <code>{args}</code> удалён из списка.")
+			elif args_list[0][0] != '@':
+				await utils.answer(message, 'Это не <b>@ид/юзер</b>.')
 			else:
 				try:
 					user, count = str(args_list[0]), float(args_list[1])
@@ -190,15 +190,15 @@ class NumMod(loader.Module):
 		else:
 			reply = await message.get_reply_message()
 			if not reply: 
-				return await utils.answer(message, 'Реплай должен быть на смс ириса "...подверг заражению..."')
+				return await utils.answer(message, 'Реплай должен быть на смс ириса "<b>...подверг заражению...</b>"')
 			elif reply.sender_id != 707693258 and not 'подверг заражению' in reply.text:
-				return await utils.answer(message, 'Реплай должен быть на смс ириса "...подверг заражению..."')
+				return await utils.answer(message, 'Реплай должен быть на смс ириса "<b>...подверг заражению...</b>"')
 			else: #☣
 				text = reply.text
 				x = text.index('☣')+4
 				count = text[x:].split(' ', maxsplit=1)[0]
 				x = text.index('user?id=') + 8
-				user = text[x:].split('"', maxsplit=1)[0]
+				user = '@' + text[x:].split('"', maxsplit=1)[0]
 				infList[user] = [str(count), vremya]
 				self.db.set("NumMod", "infList", infList)
 				await utils.answer(message, f"Пользователь <code>{user}</code> добавлен в список заражений.\nЧисло: <code>{count}</code>\nДата: <b>{vremya}</b>")
