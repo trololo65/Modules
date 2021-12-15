@@ -143,7 +143,7 @@ class NumMod(loader.Module):
 		await message.edit(f'Пользователь <code>{args}</code> добавлен.')
 		
 	async def zarlistcmd(self, message):
-		""" Лист ваших заражений.\n.zarlist {@id/user} {count} {args}\nДля удаления: .zarlist {@id/user}\nАргументы:\n-k -- добавить букву k(тысяч) к числу.\n-f -- поиск по ид'у/юзеру."""
+		""" Лист ваших заражений.\n.zarlist {@id/user} {count} {args}\nДля удаления: .zarlist {@id/user}\nАргументы:\n-k -- добавить букву k(тысяч) к числу.\n-f -- поиск по ид'у/юзеру.\n-r -- добавлению в список по реплаю."""
 		args = utils.get_args_raw(message)
 		infList = self.db.get("NumMod", "infList")
 		timezone = "Europe/Kiev"
@@ -161,7 +161,7 @@ class NumMod(loader.Module):
 				sms+=f'<b>• <code>{key}</code> -- <code>{value[0]}</code> [<i>{value[1]}</i>]</b>\n'
 			await utils.answer(message, sms)
 			return
-		if not '-r' in args:
+		if not '-r' in args.lower():
 			if args_list[0] == "clear":
 				infList.clear()
 				self.db.set("NumMod", "infList", infList)
@@ -201,4 +201,4 @@ class NumMod(loader.Module):
 				user = text[x:].split('"', maxsplit=1)[0]
 				infList[user] = [str(count), vremya]
 				self.db.set("NumMod", "infList", infList)
-				await utils.answer(message, f"Пользователь <code>{user}</code> добавлен в список заражений.\nЧисло: <code>{count}</code>{k}\nДата: <b>{vremya}</b>")
+				await utils.answer(message, f"Пользователь <code>{user}</code> добавлен в список заражений.\nЧисло: <code>{count}</code>\nДата: <b>{vremya}</b>")
