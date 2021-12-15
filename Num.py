@@ -1,7 +1,8 @@
 from .. import loader, utils
-import asyncio
+import asyncio, pytz
 from telethon.tl.types import MessageEntityTextUrl
 import json as JSON
+from datetime import datetime, date, time
 
 class NumMod(loader.Module):
 	"Заражает по реплаю."
@@ -11,6 +12,8 @@ class NumMod(loader.Module):
 		self.db = db
 		if not self.db.get("NumMod", "exUsers", False):
 			self.db.set("NumMod", "exUsers", [])
+		if not self.db.get("NumMod", "infList", False):
+			self.db.set("NumMod", "infList", {})
 		
 	async def numcmd(self, message):
 		".num [arg] [arg] [arg]....\nВ качестве аргументов используй числа. или первые символы строки."
@@ -104,7 +107,7 @@ class NumMod(loader.Module):
 			except:
 				await message.reply("заразить " + reply.raw_text[json["entities"][i]["offset"]:json["entities"][i]["offset"]+json["entities"][i]["length"]] )
 			await asyncio.sleep(3)
-		await message.respond('<b>Заражения успешно завершены.</b>')
+		await message.delete() 
 		
 	async def exnumcmd(self, message):
 		"Добавляет исключения в модуль.\nИспользуй: .exnum {@user/@id}"
@@ -138,3 +141,42 @@ class NumMod(loader.Module):
 		exlist.append(args)
 		self.db.set("NumMod", "exUsers", exlist)
 		await message.edit(f'Пользователь <code>{args}</code> добавлен.')
+		
+	async def zarlistcmd(self, message):
+		""" Лист ваших заражений.\n.zarlist {@id/user} {count}\nДля удаления: .zarlist {@id/user}"""
+		args = utils.get_args_raw(message)
+		infList = self.db.get("NumMod", "infList")
+		try:
+			args_list = args.split(' ')
+		except:
+			pass
+		if not args:
+			if not infList:
+				await utils.answer(message, "Лист заражений пуст.")
+				return
+			sms = ''
+			for key, value in infList.items():
+				sms+=f'<b>• <code>{key}</code> -- {value[0]}К [<i>{value[1]}</i>]</b>\n'
+			await utils.answer(message, sms)
+			return
+		if args_list[0] == "clear":
+			infList.clear()
+			self.db.set("NumMod", "infList", infList)
+			await utils.answer(message, "Лист заражений очищен")
+		elif args_list[0][0] != '@':
+			await utils.answer(message, 'Это не ид/юзер.')
+		elif len(args_list) == 1 and args_list[0] in infList:
+			infList.pop(args_list[0])
+			self.db.set("NumMod", "infList", infList)
+			await utils.answer(message, f"Пользователь <code>{args}</code> удалён из списка.")
+		else:
+			try:
+				user, count = str(args_list[0]), float(args_list[1])
+			except:
+				await utils.answer(message, "Данные были введены не корректно")
+				return
+			timezone = "Europe/Kiev"
+			vremya = datetime.now(pytz.timezone(timezone)).strftime("%d.%m")
+			infList[user] = [count, vremya]
+			self.db.set("NumMod", "infList", infList)
+			await utils.answer(message, f"Пользователь <code>{user}</code> добавлен в список заражений.\nЧисло: <code>{count}</code>\nДата: <b>{vremya}</b>")
