@@ -152,7 +152,7 @@ class NumMod(loader.Module):
 			pass
 		if not args:
 			if not infList:
-				await utils.answer(message, "Лист заражений пуст.")
+				await utils.answer(message, "Лист заражений <b>пуст</b>.")
 				return
 			sms = ''
 			for key, value in infList.items():
@@ -162,9 +162,9 @@ class NumMod(loader.Module):
 		if args_list[0] == "clear":
 			infList.clear()
 			self.db.set("NumMod", "infList", infList)
-			await utils.answer(message, "Лист заражений очищен")
+			await utils.answer(message, "Лист заражений <b>очищен</b>.")
 		elif args_list[0][0] != '@':
-			await utils.answer(message, 'Это не ид/юзер.')
+			await utils.answer(message, 'Это не <b>@ид/юзер</b>.')
 		elif len(args_list) == 1 and args_list[0] in infList:
 			infList.pop(args_list[0])
 			self.db.set("NumMod", "infList", infList)
