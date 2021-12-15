@@ -143,7 +143,7 @@ class NumMod(loader.Module):
 		await message.edit(f'Пользователь <code>{args}</code> добавлен.')
 		
 	async def zarlistcmd(self, message):
-		""" Лист ваших заражений.\n.zarlist {@id/user} {count}\nДля удаления: .zarlist {@id/user}"""
+		""" Лист ваших заражений.\n.zarlist {@id/user} {count} {args}\nДля удаления: .zarlist {@id/user}\nАргументы:\n-k -- добавить букву k(тысяч) к числу.\n-f -- поиск по иду."""
 		args = utils.get_args_raw(message)
 		infList = self.db.get("NumMod", "infList")
 		try:
@@ -165,7 +165,7 @@ class NumMod(loader.Module):
 			await utils.answer(message, "Лист заражений <b>очищен</b>.")
 		elif args_list[0][0] != '@':
 			await utils.answer(message, 'Это не <b>@ид/юзер</b>.')
-		elif len(args_list) == 1 and args_list[0] in infList and '-f' in args.lower():
+		elif args_list[0] in infList and '-f' in args.lower():
 			user = infList[args_list[0]]
 			await utils.answer(message, f"<b>• <code>{args_list[0]}</code> -- {user[0]} [<i>{user[1]}</i>]</b>")
 		elif len(args_list) == 1 and args_list[0] in infList:
