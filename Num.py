@@ -146,6 +146,8 @@ class NumMod(loader.Module):
 		""" Лист ваших заражений.\n.zarlist {@id/user} {count} {args}\nДля удаления: .zarlist {@id/user}\nАргументы:\n-k -- добавить букву k(тысяч) к числу.\n-f -- поиск по ид'у/юзеру."""
 		args = utils.get_args_raw(message)
 		infList = self.db.get("NumMod", "infList")
+		timezone = "Europe/Kiev"
+		vremya = datetime.now(pytz.timezone(timezone)).strftime("%d.%m")
 		try:
 			args_list = args.split(' ')
 		except:
@@ -159,30 +161,44 @@ class NumMod(loader.Module):
 				sms+=f'<b>• <code>{key}</code> -- <code>{value[0]}</code> [<i>{value[1]}</i>]</b>\n'
 			await utils.answer(message, sms)
 			return
-		if args_list[0] == "clear":
-			infList.clear()
-			self.db.set("NumMod", "infList", infList)
-			await utils.answer(message, "Лист заражений <b>очищен</b>.")
-		elif args_list[0][0] != '@':
-			await utils.answer(message, 'Это не <b>@ид/юзер</b>.')
-		elif args_list[0] in infList and '-f' in args.lower():
-			user = infList[args_list[0]]
-			await utils.answer(message, f"<b>• <code>{args_list[0]}</code> -- {user[0]} [<i>{user[1]}</i>]</b>")
-		elif len(args_list) == 1 and args_list[0] in infList:
-			infList.pop(args_list[0])
-			self.db.set("NumMod", "infList", infList)
-			await utils.answer(message, f"Пользователь <code>{args}</code> удалён из списка.")
+		if not '-r' in args:
+			if args_list[0] == "clear":
+				infList.clear()
+				self.db.set("NumMod", "infList", infList)
+				await utils.answer(message, "Лист заражений <b>очищен</b>.")
+			elif args_list[0][0] != '@':
+				await utils.answer(message, 'Это не <b>@ид/юзер</b>.')
+			elif args_list[0] in infList and '-f' in args.lower():
+				user = infList[args_list[0]]
+				await utils.answer(message, f"<b>• <code>{args_list[0]}</code> -- {user[0]} [<i>{user[1]}</i>]</b>")
+			elif len(args_list) == 1 and args_list[0] in infList:
+				infList.pop(args_list[0])
+				self.db.set("NumMod", "infList", infList)
+				await utils.answer(message, f"Пользователь <code>{args}</code> удалён из списка.")
+			else:
+				try:
+					user, count = str(args_list[0]), float(args_list[1])
+				except:
+					await utils.answer(message, "Данные были введены не корректно")
+					return
+				k = ''
+				if '-k' in args.lower():
+					k+='k'
+				infList[user] = [str(count)+k, vremya]
+				self.db.set("NumMod", "infList", infList)
+				await utils.answer(message, f"Пользователь <code>{user}</code> добавлен в список заражений.\nЧисло: <code>{count}</code>{k}\nДата: <b>{vremya}</b>")
 		else:
-			try:
-				user, count = str(args_list[0]), float(args_list[1])
-			except:
-				await utils.answer(message, "Данные были введены не корректно")
-				return
-			timezone = "Europe/Kiev"
-			vremya = datetime.now(pytz.timezone(timezone)).strftime("%d.%m")
-			k = ''
-			if '-k' in args.lower():
-				k+='k'
-			infList[user] = [str(count)+k, vremya]
-			self.db.set("NumMod", "infList", infList)
-			await utils.answer(message, f"Пользователь <code>{user}</code> добавлен в список заражений.\nЧисло: <code>{count}</code>{k}\nДата: <b>{vremya}</b>")
+			reply = await message.get_reply_message()
+			if not reply: 
+				return await utils.answer(message, 'Реплай должен быть на смс ириса "...подверг заражению..."')
+			elif reply.sender_id != 707693258 and not 'подверг заражению' in reply.text:
+				return await utils.answer(message, 'Реплай должен быть на смс ириса "...подверг заражению..."')
+			else: #☣
+				text = reply.text
+				x = text.index('☣')+4
+				count = text[x:].split(' ', maxsplit=1)[0]
+				x = text.index('user?id=') + 8
+				user = text[x:].split('"', maxsplit=1)[0]
+				infList[user] = [str(count), vremya]
+				self.db.set("NumMod", "infList", infList)
+				await utils.answer(message, f"Пользователь <code>{user}</code> добавлен в список заражений.\nЧисло: <code>{count}</code>{k}\nДата: <b>{vremya}</b>")
