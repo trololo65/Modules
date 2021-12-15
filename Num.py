@@ -143,7 +143,7 @@ class NumMod(loader.Module):
 		await message.edit(f'Пользователь <code>{args}</code> добавлен.')
 		
 	async def zarlistcmd(self, message):
-		""" Лист ваших заражений.\n.zarlist {@id/user} {count} {args}\nДля удаления: .zarlist {@id/user}\nАргументы:\n-k -- добавить букву k(тысяч) к числу.\n-f -- поиск по иду."""
+		""" Лист ваших заражений.\n.zarlist {@id/user} {count} {args}\nДля удаления: .zarlist {@id/user}\nАргументы:\n-k -- добавить букву k(тысяч) к числу.\n-f -- поиск по ид'у/юзеру."""
 		args = utils.get_args_raw(message)
 		infList = self.db.get("NumMod", "infList")
 		try:
