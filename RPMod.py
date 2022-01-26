@@ -325,7 +325,7 @@ class RPMod(loader.Module):
 			chat_rp = await message.client.get_entity(message.to_id)
 			if status != 1 or chat_rp.id in ex: return
 			me_id = (await message.client.get_me()).id
-			if message.sender_id not in users_accept or message.sender_id != me_id: return
+			if message.sender_id not in users_accept and message.sender_id != me_id: return
 			me = (await message.client.get_entity(message.sender_id))
 			
 			if str(me.id) in nicks.keys():
