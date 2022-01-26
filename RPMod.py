@@ -325,7 +325,7 @@ class RPMod(loader.Module):
 			chat_rp = await message.client.get_entity(message.to_id)
 			if status != 1 or chat_rp.id in ex: return
 			me_id = (await message.client.get_me()).id
-			if not message.sender_id in users_accept or message.sender_id != me_id: return
+			if message.sender_id not in users_accept or message.sender_id != me_id: return
 			me = (await message.client.get_entity(message.sender_id))
 			
 			if str(me.id) in nicks.keys():
@@ -375,7 +375,6 @@ class RPMod(loader.Module):
 								return await utils.answer(message, f"{emojies[detail[0]]} | <a href=tg://user?id={me.id}>{nick}</a> {comand[detail[0]]} <a href=tg://user?id={user.id}>{user.first_name}</a>"+detail[1]+f"\n<b>С репликой: </b>{lines[1]}")
 							else:
 								return await message.respond(f"{emojies[detail[0]]} | <a href=tg://user?id={me.id}>{nick}</a> {comand[detail[0]]} <a href=tg://user?id={user.id}>{user.first_name}</a>"+detail[1]+f"\n<b>С репликой: </b>{lines[1]}")
-						break
 					else:
 						if len(lines) < 2:
 							if rezjim == 1:
@@ -387,5 +386,4 @@ class RPMod(loader.Module):
 								return await utils.answer(message, f"<a href=tg://user?id={me.id}>{nick}</a> {comand[detail[0]]} <a href=tg://user?id={user.id}>{user.first_name}</a>"+detail[1]+f"\n<b>С репликой: </b>{lines[1]}")
 							else:
 								return await message.respond(f"<a href=tg://user?id={me.id}>{nick}</a> {comand[detail[0]]} <a href=tg://user?id={user.id}>{user.first_name}</a>"+detail[1]+f"\n<b>С репликой: </b>{lines[1]}")
-						break
 		except: pass
