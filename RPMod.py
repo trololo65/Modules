@@ -321,16 +321,20 @@ class RPMod(loader.Module):
 			ex = self.db.get("RPMod", "exlist")
 			nicks = self.db.get('RPMod', 'rpnicks')
 			users_accept = self.db.get('RPMod', 'useraccept')
-
-			me = (await message.client.get_entity(message.sender_id))
+			
+			chat_rp = await message.client.get_entity(message.to_id)
+			if status != 1 or chat_rp.id in ex: return
 			me_id = (await message.client.get_me()).id
+			if not message.sender_id in users_accept or message.sender_id != me_id: return
+			me = (await message.client.get_entity(message.sender_id))
+			
 			if str(me.id) in nicks.keys():
 				nick = nicks[str(me.id)]
 			else:
 				nick = me.first_name
 			args = message.text.lower()
 			
-			chat_rp = await message.client.get_entity(message.to_id)
+			
 			lines = args.splitlines()
 			detail = []
 			tags = lines[0].split(' ')
@@ -356,30 +360,32 @@ class RPMod(loader.Module):
 				detail.append(' ')
 			user.first_name = nicks[str(user.id)] if str(user.id) in nicks else user.first_name
 			
-			if status == 1 and chat_rp.id not in ex:
-				if message.sender_id in users_accept or message.sender_id == me_id:
-					for i in comand:
-						if detail[0] == i:
-							if detail[0] in emojies.keys():
-								if len(lines) < 2:
-									if rezjim == 1:
-										return await utils.answer(message, f"{emojies[detail[0]]} | <a href=tg://user?id={me.id}>{nick}</a> {comand[detail[0]]} <a href=tg://user?id={user.id}>{user.first_name}</a>"+detail[1])
-									else:
-										return await message.respond(f"{emojies[detail[0]]} | <a href=tg://user?id={me.id}>{nick}</a> {comand[detail[0]]} <a href=tg://user?id={user.id}>{user.first_name}</a>"+detail[1])
+			
+			
+				for i in comand:
+					if detail[0] == i:
+						if detail[0] in emojies.keys():
+							if len(lines) < 2:
+								if rezjim == 1:
+									return await utils.answer(message, f"{emojies[detail[0]]} | <a href=tg://user?id={me.id}>{nick}</a> {comand[detail[0]]} <a href=tg://user?id={user.id}>{user.first_name}</a>"+detail[1])
 								else:
-									if rezjim == 1:
-										return await utils.answer(message, f"{emojies[detail[0]]} | <a href=tg://user?id={me.id}>{nick}</a> {comand[detail[0]]} <a href=tg://user?id={user.id}>{user.first_name}</a>"+detail[1]+f"\n<b>С репликой: </b>{lines[1]}")
-									else:
-										return await message.respond(f"{emojies[detail[0]]} | <a href=tg://user?id={me.id}>{nick}</a> {comand[detail[0]]} <a href=tg://user?id={user.id}>{user.first_name}</a>"+detail[1]+f"\n<b>С репликой: </b>{lines[1]}")
+									return await message.respond(f"{emojies[detail[0]]} | <a href=tg://user?id={me.id}>{nick}</a> {comand[detail[0]]} <a href=tg://user?id={user.id}>{user.first_name}</a>"+detail[1])
 							else:
-								if len(lines) < 2:
-									if rezjim == 1:
-										return await utils.answer(message, f"<a href=tg://user?id={me.id}>{nick}</a> {comand[detail[0]]} <a href=tg://user?id={user.id}>{user.first_name}</a>"+detail[1])
-									else:
-										return await message.respond(f"<a href=tg://user?id={me.id}>{nick}</a> {comand[detail[0]]} <a href=tg://user?id={user.id}>{user.first_name}</a>"+detail[1])
+								if rezjim == 1:
+									return await utils.answer(message, f"{emojies[detail[0]]} | <a href=tg://user?id={me.id}>{nick}</a> {comand[detail[0]]} <a href=tg://user?id={user.id}>{user.first_name}</a>"+detail[1]+f"\n<b>С репликой: </b>{lines[1]}")
 								else:
-									if rezjim == 1:
-										return await utils.answer(message, f"<a href=tg://user?id={me.id}>{nick}</a> {comand[detail[0]]} <a href=tg://user?id={user.id}>{user.first_name}</a>"+detail[1]+f"\n<b>С репликой: </b>{lines[1]}")
-									else:
-										return await message.respond(f"<a href=tg://user?id={me.id}>{nick}</a> {comand[detail[0]]} <a href=tg://user?id={user.id}>{user.first_name}</a>"+detail[1]+f"\n<b>С репликой: </b>{lines[1]}")
+									return await message.respond(f"{emojies[detail[0]]} | <a href=tg://user?id={me.id}>{nick}</a> {comand[detail[0]]} <a href=tg://user?id={user.id}>{user.first_name}</a>"+detail[1]+f"\n<b>С репликой: </b>{lines[1]}")
+							break
+						else:
+							if len(lines) < 2:
+								if rezjim == 1:
+									return await utils.answer(message, f"<a href=tg://user?id={me.id}>{nick}</a> {comand[detail[0]]} <a href=tg://user?id={user.id}>{user.first_name}</a>"+detail[1])
+								else:
+									return await message.respond(f"<a href=tg://user?id={me.id}>{nick}</a> {comand[detail[0]]} <a href=tg://user?id={user.id}>{user.first_name}</a>"+detail[1])
+							else:
+								if rezjim == 1:
+									return await utils.answer(message, f"<a href=tg://user?id={me.id}>{nick}</a> {comand[detail[0]]} <a href=tg://user?id={user.id}>{user.first_name}</a>"+detail[1]+f"\n<b>С репликой: </b>{lines[1]}")
+								else:
+									return await message.respond(f"<a href=tg://user?id={me.id}>{nick}</a> {comand[detail[0]]} <a href=tg://user?id={user.id}>{user.first_name}</a>"+detail[1]+f"\n<b>С репликой: </b>{lines[1]}")
+							break
 		except: pass
