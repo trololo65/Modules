@@ -9,6 +9,29 @@ except:
 from .. import loader, utils
 import string, pickle
 
+conf_default = {
+			'-s1':{												# СТИЛИ для "С репликой"
+				'1': [True, '<b>жирный</b>', '<b>', '</b>'], 
+				'2': [False, '<i>курсив</i>', '<i>', '</i>'], 
+				'3': [False, '<u>подчеркнутый</u>', '<u>', '</u>']
+			}, 
+			'-s2':{ 											# СТИЛИ для реплики
+				'1': [False, '<b>жирный</b>', '<b>', '</b>'], 
+				'2': [False, '<i>курсив</i>', '<i>', '</i>'], 
+				'3': [False, '<u>подчеркнутый</u>', '<u>', '</u>']
+			}, 
+			'-sE':{ 											# ЭМОДЗИ перед репликой
+				'1': [True, '💬'], 
+				'2': [False, '💭'], 
+				'3': [False, '🗯'], 
+				'4': [False, '✉️']
+			}, 
+			'-sS':{ 											# РАЗРЫВ строки в реплике
+				'1': [True, 'пробел', ' '], 
+				'2': [False, 'разрыв строки', '\n'],
+				'3': [False, 'точка + пробел', '. '],
+				'4': [False, 'запятая + пробел', ', ']} 
+			}
 @loader.tds
 class RPMod(loader.Module):
 	"""Модуль RPMod."""
@@ -312,6 +335,37 @@ class RPMod(loader.Module):
 		else:
 			await utils.answer(message, 'Что то не так..')
 
+	async def rpconfcmd(self, message):
+		"""Настройка шаблона для рп"""
+		conf = self.db.get("RPMod", "rpconfigurate", conf_default)
+		args = utils.get_args_raw(message)
+		if not args:
+			sms = '⚙️ <b>Настройка шаблона для команды:</b>\n'
+			s1 = '\n'.join([' | '.join([key, value[1], '✅' if value[0] else '❌']) for key, value in conf['-s1'].items()])
+			s2 = '\n'.join([' | '.join([key, value[1], '✅' if value[0] else '❌']) for key, value in conf['-s2'].items()])
+			sE = '\n'.join([' | '.join([key, value[1], '✅' if value[0] else '❌']) for key, value in conf['-sE'].items()])
+			sS = '\n'.join([' | '.join([key, value[1], '✅' if value[0] else '❌']) for key, value in conf['-sS'].items()])
+			return await utils.answer(message, f'⚙️ <b>Настройка шаблона для команды:</b>\n<code>-s1</code> --- включить/выключить стиль для "С репликой":\n{s1}\n-s2 --- аналогично для s1, но действует на саму реплику:\n{s2}\n-sE --- выбор эмодзи перед репликой:\n{sE}\n-sS --- выбор символа для разрыва строк в реплике:\n{sS}\n\nПример:\n<code>.rpconf -s1 2</code>')
+		args = args.split(' ')
+		if len(args) <= 1:
+			return await utils.answer(message, 'Было введено меньше двух аргументов.')
+		try:
+			if args[0] == '-s1' or args[0] == '-s2':
+				if conf[args[0]][args[1]][0]:
+					conf[args[0]][args[1]][0] = False
+				else:
+					conf[args[0]][args[1]][0] = True
+			elif args[0] == '-sE' or args[0] == '-sS':
+				for i in conf[args[0]].keys():
+					conf[args[0]][i][0] = False
+				conf[args[0]][args[1]][0] = True
+			else:
+				return await utils.answer(message, 'Неизвестный аргумент.')
+		except:
+			return await utils.answer(message, 'Неверная цифра.')
+		self.db.set("RPMod", "rpconfigurate", conf)
+		await utils.answer(message, f'Конфигурация успешно изменена.')
+
 	async def watcher(self, message):
 		try:
 			status = self.db.get("RPMod", "status")
@@ -321,6 +375,7 @@ class RPMod(loader.Module):
 			ex = self.db.get("RPMod", "exlist")
 			nicks = self.db.get('RPMod', 'rpnicks')
 			users_accept = self.db.get('RPMod', 'useraccept')
+			conf = self.db.get("RPMod", "rpconfigurate", conf_default)
 			
 			chat_rp = await message.client.get_entity(message.to_id)
 			if status != 1 or chat_rp.id in ex: return
@@ -352,29 +407,18 @@ class RPMod(loader.Module):
 			if detail[0] not in comand.keys(): return
 			detail[1] = ' ' + detail[1] 
 			user.first_name = nicks[str(user.id)] if str(user.id) in nicks else user.first_name
-			
-			sB = '💬'
-			
-			if detail[0] in emojies.keys():
-				if len(lines) < 2:
-					if rezjim == 1:
-						return await utils.answer(message, f"{emojies[detail[0]]} | <a href=tg://user?id={me.id}>{nick}</a> {comand[detail[0]]} <a href=tg://user?id={user.id}>{user.first_name}</a>"+detail[1])
-					else:
-						return await message.respond(f"{emojies[detail[0]]} | <a href=tg://user?id={me.id}>{nick}</a> {comand[detail[0]]} <a href=tg://user?id={user.id}>{user.first_name}</a>"+detail[1])
-				else:
-					if rezjim == 1:
-						return await utils.answer(message, f"{emojies[detail[0]]} | <a href=tg://user?id={me.id}>{nick}</a> {comand[detail[0]]} <a href=tg://user?id={user.id}>{user.first_name}</a>"+detail[1]+"\n{} <b>С репликой: </b>{}".format(sB, '\n'.join(lines[1:])))
-					else:
-						return await message.respond(f"{emojies[detail[0]]} | <a href=tg://user?id={me.id}>{nick}</a> {comand[detail[0]]} <a href=tg://user?id={user.id}>{user.first_name}</a>"+detail[1]+"\n{} <b>С репликой: </b>{}".format(sB, '\n'.join(lines[1:])))
+			sE = ''.join([''.join([ value[1] if value[0] else '']) for key, value in conf['-sE'].items()])
+			s1 = [''.join([ value[2] if value[0] else '' for value in conf['-s1'].values()]), ''.join([ value[3] if value[0] else '' for value in dict(reversed(list(conf['-s1'].items()))).values()])]
+			s2 = [''.join([ value[2] if value[0] else '' for key, value in conf['-s2'].items()]), ''.join([ value[3] if value[0] else '' for value in dict(reversed(list(conf['-s2'].items()))).values()])]
+			sS = ''.join([''.join([ value[2] if value[0] else '']) for key, value in conf['-sS'].items()])
+	
+			rpMessageSend = ''
+			if detail[0] in emojies.keys(): rpMessageSend += emojies[detail[0]] + ' | '
+			rpMessageSend += f"<a href=tg://user?id={me.id}>{nick}</a> {comand[detail[0]]} <a href=tg://user?id={user.id}>{user.first_name}</a>{detail[1]}"
+			if len(lines) >= 2: rpMessageSend += "\n{0} {1[0]}С репликой: {1[1]}{2[0]}{3}{2[1]}".format(sE, s1, s2, f'{sS}'.join(lines[1:]))
+			if rezjim == 1:
+				return await utils.answer(message, rpMessageSend)
 			else:
-				if len(lines) < 2:
-					if rezjim == 1:
-						return await utils.answer(message, f"<a href=tg://user?id={me.id}>{nick}</a> {comand[detail[0]]} <a href=tg://user?id={user.id}>{user.first_name}</a>"+detail[1])
-					else:
-						return await message.respond(f"<a href=tg://user?id={me.id}>{nick}</a> {comand[detail[0]]} <a href=tg://user?id={user.id}>{user.first_name}</a>"+detail[1])
-				else:
-					if rezjim == 1:
-						return await utils.answer(message, f"<a href=tg://user?id={me.id}>{nick}</a> {comand[detail[0]]} <a href=tg://user?id={user.id}>{user.first_name}</a>"+detail[1]+"\n{} <b>С репликой: </b>{}".format(sB, '\n'.join(lines[1:])))
-					else:
-						return await message.respond(f"<a href=tg://user?id={me.id}>{nick}</a> {comand[detail[0]]} <a href=tg://user?id={user.id}>{user.first_name}</a>"+detail[1]+"\n{} <b>С репликой: </b>{}".format(sB, '\n'.join(lines[1:])))
-		except: pass 
+				return await message.respond(rpMessageSend)
+
+		except:  pass
