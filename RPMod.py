@@ -363,9 +363,9 @@ class RPMod(loader.Module):
 						return await message.respond(f"{emojies[detail[0]]} | <a href=tg://user?id={me.id}>{nick}</a> {comand[detail[0]]} <a href=tg://user?id={user.id}>{user.first_name}</a>"+detail[1])
 				else:
 					if rezjim == 1:
-						return await utils.answer(message, f"{emojies[detail[0]]} | <a href=tg://user?id={me.id}>{nick}</a> {comand[detail[0]]} <a href=tg://user?id={user.id}>{user.first_name}</a>"+detail[1]+f"\n<b>С репликой: </b>{lines[1]}")
+						return await utils.answer(message, f"{emojies[detail[0]]} | <a href=tg://user?id={me.id}>{nick}</a> {comand[detail[0]]} <a href=tg://user?id={user.id}>{user.first_name}</a>"+detail[1]+f"\n<b>С репликой: </b>{'\n'.join(lines[1:])}")
 					else:
-						return await message.respond(f"{emojies[detail[0]]} | <a href=tg://user?id={me.id}>{nick}</a> {comand[detail[0]]} <a href=tg://user?id={user.id}>{user.first_name}</a>"+detail[1]+f"\n<b>С репликой: </b>{lines[1]}")
+						return await message.respond(f"{emojies[detail[0]]} | <a href=tg://user?id={me.id}>{nick}</a> {comand[detail[0]]} <a href=tg://user?id={user.id}>{user.first_name}</a>"+detail[1]+f"\n<b>С репликой: </b>{'\n'.join(lines[1:])}")
 			else:
 				if len(lines) < 2:
 					if rezjim == 1:
@@ -374,7 +374,7 @@ class RPMod(loader.Module):
 						return await message.respond(f"<a href=tg://user?id={me.id}>{nick}</a> {comand[detail[0]]} <a href=tg://user?id={user.id}>{user.first_name}</a>"+detail[1])
 				else:
 					if rezjim == 1:
-						return await utils.answer(message, f"<a href=tg://user?id={me.id}>{nick}</a> {comand[detail[0]]} <a href=tg://user?id={user.id}>{user.first_name}</a>"+detail[1]+f"\n<b>С репликой: </b>{lines[1]}")
+						return await utils.answer(message, f"<a href=tg://user?id={me.id}>{nick}</a> {comand[detail[0]]} <a href=tg://user?id={user.id}>{user.first_name}</a>"+detail[1]+f"\n<b>С репликой: </b>{'\n'.join(lines[1:])}")
 					else:
-						return await message.respond(f"<a href=tg://user?id={me.id}>{nick}</a> {comand[detail[0]]} <a href=tg://user?id={user.id}>{user.first_name}</a>"+detail[1]+f"\n<b>С репликой: </b>{lines[1]}")
+						return await message.respond(f"<a href=tg://user?id={me.id}>{nick}</a> {comand[detail[0]]} <a href=tg://user?id={user.id}>{user.first_name}</a>"+detail[1]+f"\n<b>С репликой: </b>{'\n'.join(lines[1:])}")
 		except: pass
