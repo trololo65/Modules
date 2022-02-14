@@ -254,7 +254,7 @@ class NumMod(loader.Module):
 		if not filter_and_users['filter'] or not filter_and_users['status'] or user_id not in filter_and_users['users'] or message.is_private: return
 		text = message.raw_text.lower()
 		if not text.startswith(filter_and_users['filter']): return
-		send_mes = re.search(r"зарази[ть]{,2}(\s[1-9]?[0]?)?\s@[1-9a-z]+", text)
+		send_mes = re.search(r"зарази[ть]{,2}(\s[1-9]?[0]?)?\s@[0-9a-z]+", text)
 		if send_mes:
 			send_mes = send_mes.string[send_mes.start():send_mes.end()].split(' ', maxsplit=1)
 			send_mes[0] = 'заразить'
