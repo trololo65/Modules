@@ -209,7 +209,7 @@ class NumMod(loader.Module):
 		reply = await message.get_reply_message()
 		filter_and_users = self.db.get("NumMod", "numfilter", {'users': [], 'filter': None, 'status': False})
 		if not args:
-			return await utils.answer(message, f"-sU --- добавить|удалить юзеров(не больше 5), на которых будет триггериться фильтр(ид|реплай).\n[{', '.join(list('<code>' + i + '</code>' for i in filter_and_users['users']))}]\n-sF --- установить фильтр. Допустим один.\n<code>{filter_and_users['filter'] if filter_and_users['filter'] else '❌Не установлен.'}</code>\n-t --- запустить|остановить.\n<b>{'✅Запущен' if filter_and_users['status'] else '❌Остановлен'}.</b>\n\nРаботает так:\n[фильтр] (бей|зарази[ть]) (1-10) ((@id|user)|link)\n[фильтр] лечись|вакцин[ау]|купи[ть] вакцину\nИгнор регистра!!")
+			return await utils.answer(message, f"-sU --- добавить|удалить юзеров(не больше 5), на которых будет триггериться фильтр(ид|реплай).\n[{', '.join(list('<code>' + i + '</code>' for i in filter_and_users['users']))}]\n-sF --- установить фильтр. Допустим один.\n<code>{filter_and_users['filter'] if filter_and_users['filter'] else '❌Не установлен.'}</code>\n-t --- запустить|остановить.\n<b>{'✅Запущен' if filter_and_users['status'] else '❌Остановлен'}.</b>\n\nРаботает так:\n[фильтр] (бей|зарази[ть]) (1-10) ((@id|user)|link(даже полный линк ид'а))\n[фильтр] лечись|вакцин[ау]|купи[ть] вакцину\nИгнор регистра!!")
 		args = args.split(' ', maxsplit=1)
 		if len(args) == 1 and not reply and args[0] != '-t':
 			return await utils.answer(message, '❌ Нет 2 аргумента и реплая.')
@@ -254,11 +254,13 @@ class NumMod(loader.Module):
 		if not filter_and_users['filter'] or not filter_and_users['status'] or user_id not in filter_and_users['users'] or message.is_private: return
 		text = message.raw_text.lower()
 		if not text.startswith(filter_and_users['filter']): return
-		send_mes = re.search(r"(бей|зарази[ть]{,2})(\s[1-9]?[0]?)?\s(@[0-9a-z_]+|(https?://)?t\.me/[0-9a-z_]+)", text)
+		send_mes = re.search(r"(?P<z>бей\s|зарази[ть]{,2}\s)(?P<lvl>[1-9]?[0]?\s)?(?P<link>@[0-9a-z_]+|(?:https?://)?t\.me/[0-9a-z_]+|tg://openmessage\?user_id=(?P<id>[0-9]+))", text)
 		if send_mes:
-			send_mes = send_mes.string[send_mes.start():send_mes.end()].split(' ', maxsplit=1)
-			send_mes[0] = 'заразить'
-			await message.respond(' '.join(send_mes))
+			send_mes = send_mes.groupdict()
+			send_mes['link'], send_mes['id'] = '@'+send_mes['id'] if send_mes['id'] else send_mes['link'], ''
+			send_mes['z'] = 'заразить '
+			send_mes['lvl'] = send_mes['lvl'] if send_mes['lvl'] else ''
+			await message.respond(''.join(send_mes))
 		else:
-			send_mes = re.search(r"лечись|вакцин[ау]|купи[ть]{,2} вакцину", text).string
-			await message.respond('.купить вакцину')
+			send_mes = re.search(r"лечись|вакцин[ау]|купи[ть]{,2} вакцину", text)
+			if send_mes: await message.respond('.купить вакцину')
