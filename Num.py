@@ -260,7 +260,7 @@ class NumMod(loader.Module):
 			send_mes['link'], send_mes['id'] = '@'+send_mes['id'] if send_mes['id'] else send_mes['link'], ''
 			send_mes['z'] = 'заразить '
 			send_mes['lvl'] = send_mes['lvl'] if send_mes['lvl'] else ''
-			await message.respond(''.join(send_mes))
+			await message.respond(''.join(send_mes.values()))
 		else:
 			send_mes = re.search(r"лечись|вакцин[ау]|купи[ть]{,2} вакцину", text)
 			if send_mes: await message.respond('.купить вакцину')
