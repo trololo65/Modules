@@ -7,24 +7,34 @@ except:
 	mod_inst.wait()
 	import emoji
 from .. import loader, utils
-import string, pickle
+import string, pickle, re
 
 conf_default = {
-			'-s1':{												# СТИЛИ для "С репликой"
-				'1': [True, '<b>жирный</b>', '<b>', '</b>'], 
-				'2': [False, '<i>курсив</i>', '<i>', '</i>'], 
-				'3': [False, '<u>подчеркнутый</u>', '<u>', '</u>']
-			}, 
-			'-s2':{ 											# СТИЛИ для реплики
+			'-s1':{ 											# СТИЛИ для действия
 				'1': [False, '<b>жирный</b>', '<b>', '</b>'], 
 				'2': [False, '<i>курсив</i>', '<i>', '</i>'], 
-				'3': [False, '<u>подчеркнутый</u>', '<u>', '</u>']
+				'3': [False, '<u>подчеркнутый</u>', '<u>', '</u>'],
+				'4': [False, '<s>зачёркнутый</s>', '<s>', '</s>'],
+			},
+			'-s2':{												# СТИЛИ для "С репликой"
+				'1': [True, '<b>жирный</b>', '<b>', '</b>'], 
+				'2': [False, '<i>курсив</i>', '<i>', '</i>'], 
+				'3': [False, '<u>подчеркнутый</u>', '<u>', '</u>'],
+				'4': [False, '<s>зачёркнуто</s>', '<s>', '</s>']
 			}, 
+			'-s3':{ 											# СТИЛИ для реплики
+				'1': [False, '<b>жирный</b>', '<b>', '</b>'], 
+				'2': [False, '<i>курсив</i>', '<i>', '</i>'], 
+				'3': [False, '<u>подчеркнутый</u>', '<u>', '</u>'],
+				'4': [False, '<s>зачёркнутый</s>', '<s>', '</s>']
+			},
 			'-sE':{ 											# ЭМОДЗИ перед репликой
 				'1': [True, '💬'], 
 				'2': [False, '💭'], 
 				'3': [False, '🗯'], 
-				'4': [False, '✉️']
+				'4': [False, '✉️'],
+				'5': [False, '🔊'],
+				'6': [False, '🏳️‍🌈']
 			}, 
 			'-sS':{ 											# РАЗРЫВ строки в реплике
 				'1': [True, 'пробел', ' '], 
@@ -54,6 +64,8 @@ class RPMod(loader.Module):
 			self.db.set('RPMod', 'rpemoji', {'лизь': '👅'})
 		if not self.db.get('RPMod', 'useraccept', False):
 			self.db.set('RPMod', 'useraccept', [])
+		if self.db.get("RPMod", "rpconfigurate", False):			# ДЛЯ разных версий модуля.
+			self.db.set("RPMod", "rpconfigurate", self.merge_dict(conf_default, self.db.get("RPMod", "rpconfigurate")))
 
 	async def dobrpcmd(self, message):
 		"""Используй: .dobrp (команда) / (действие) / (эмодзи) чтобы добавить команду. Можно и без эмодзи."""
@@ -181,28 +193,34 @@ class RPMod(loader.Module):
 		await utils.answer(message, listComands)
 
 	async def rpnickcmd(self, message):
-		"""Используй: .rpnick (ник) чтобы сменить свой ник. Если без аргументов, то вернётся ник из тг."""
-		r = utils.get_args_raw(message).strip()
+		"""Используй: .rpnick (ник) чтобы сменить ник пользователю или себе. С аргументом -l вызовет все ники."""
+		args = utils.get_args_raw(message).strip()
+		reply = await message.get_reply_message()
 		nicks = self.db.get('RPMod', 'rpnicks')
-		me = await message.client.get_entity(message.sender_id)
-		if not r:
-			nicks[str(me.id)] = me.first_name
+		if args == '-l':
+			str_nicks = '• ' + '\n •'.join(' --- '.join([f'<code>{user_id}</code>', f'<b>{nick}</b>'] for user_id, nick in nicks))
+
+		if not reply:
+			user = await message.client.get_entity(message.sender_id)
+		else:
+			user = await message.client.get_entity(reply.sender_id)
+		if not args:
+			nicks[str(user.id)] = user.first_name
 			self.db.set('RPMod', 'rpnicks', nicks)
-			await utils.answer(message, f"<b>Ник изменён на {me.first_name}</b>")
-			return
+			return await utils.answer(message, f"<b>Ник изменён на {user.first_name}</b>")
 		lst = []
 		nick = ''
-		for x in r:
+		for x in args:
 			if x in emoji.UNICODE_EMOJI['en'].keys(): lst.append(x)
 			if x not in emoji.UNICODE_EMOJI['en'].keys(): nick+=x
 		if len(lst) > 3:
-			await utils.answer(message, f"<b>Ник '{r}' содержит более трёх эмодзи.</b>")
+			await utils.answer(message, f"Ник пользователя <b>{str(user.id)}</b> изменён на '<b>{args}</b>'")
 		elif len(lst) + len(nick) >= 45:
 			await utils.answer(message, f"<b>Ник превышает лимит в 45 символов(возможно эмодзи имеют длину более 1 символа).</b>")
 		else:
-			nicks[str(me.id)] = r
+			nicks[str(user.id)] = args
 			self.db.set('RPMod', 'rpnicks', nicks)
-			await utils.answer(message, f"<b>Ник изменён на {r}</b>")
+			await utils.answer(message, f"Ник пользователя <b>{str(user.id)}</b> изменён на '<b>{args}</b>'")
 
 	async def rpbackcmd(self, message):
 		"""Бекап рп команд.\n .rpback для просмотра аргументов. """
@@ -343,14 +361,16 @@ class RPMod(loader.Module):
 			sms = '⚙️ <b>Настройка шаблона для команды:</b>\n'
 			s1 = '\n'.join([' | '.join([key, value[1], '✅' if value[0] else '❌']) for key, value in conf['-s1'].items()])
 			s2 = '\n'.join([' | '.join([key, value[1], '✅' if value[0] else '❌']) for key, value in conf['-s2'].items()])
+			s3 = '\n'.join([' | '.join([key, value[1], '✅' if value[0] else '❌']) for key, value in conf['-s3'].items()])
 			sE = '\n'.join([' | '.join([key, value[1], '✅' if value[0] else '❌']) for key, value in conf['-sE'].items()])
 			sS = '\n'.join([' | '.join([key, value[1], '✅' if value[0] else '❌']) for key, value in conf['-sS'].items()])
-			return await utils.answer(message, f'⚙️ <b>Настройка шаблона для команды:</b>\n<code>-s1</code> --- включить/выключить стиль для "С репликой":\n{s1}\n-s2 --- аналогично для s1, но действует на саму реплику:\n{s2}\n-sE --- выбор эмодзи перед репликой:\n{sE}\n-sS --- выбор символа для разрыва строк в реплике:\n{sS}\n\nПример:\n<code>.rpconf -s1 2</code>')
+			msg_text = f'⚙️ <b>Настройка шаблона для команды:</b>\n-s1 --- включить/выключить стиль для действия:\n{s1}\n-s2 --- аналогично для s1, но действует на текст "С репликой":\n{s2}\n-s3 --- аналогично для s2, но действует на саму реплику:\n{s3}\n-sE --- выбор эмодзи перед репликой:\n{sE}\n-sS --- выбор символа для разрыва строк в реплике:\n{sS}\n\nПример:\n<code>.rpconf -s1 2</code>'
+			return await utils.answer(message, msg_text)
 		args = args.split(' ')
 		if len(args) <= 1:
 			return await utils.answer(message, 'Было введено меньше двух аргументов.')
 		try:
-			if args[0] == '-s1' or args[0] == '-s2':
+			if args[0] == '-s1' or args[0] == '-s2' or  args[0] == '-s3':
 				if conf[args[0]][args[1]][0]:
 					conf[args[0]][args[1]][0] = False
 				else:
@@ -410,15 +430,22 @@ class RPMod(loader.Module):
 			sE = ''.join([''.join([ value[1] if value[0] else '']) for key, value in conf['-sE'].items()])
 			s1 = [''.join([ value[2] if value[0] else '' for value in conf['-s1'].values()]), ''.join([ value[3] if value[0] else '' for value in dict(reversed(list(conf['-s1'].items()))).values()])]
 			s2 = [''.join([ value[2] if value[0] else '' for key, value in conf['-s2'].items()]), ''.join([ value[3] if value[0] else '' for value in dict(reversed(list(conf['-s2'].items()))).values()])]
+			s3 = [''.join([ value[2] if value[0] else '' for key, value in conf['-s3'].items()]), ''.join([ value[3] if value[0] else '' for value in dict(reversed(list(conf['-s3'].items()))).values()])]
 			sS = ''.join([''.join([ value[2] if value[0] else '']) for key, value in conf['-sS'].items()])
 	
 			rpMessageSend = ''
 			if detail[0] in emojies.keys(): rpMessageSend += emojies[detail[0]] + ' | '
-			rpMessageSend += f"<a href=tg://user?id={me.id}>{nick}</a> {comand[detail[0]]} <a href=tg://user?id={user.id}>{user.first_name}</a>{detail[1]}"
-			if len(lines) >= 2: rpMessageSend += "\n{0} {1[0]}С репликой: {1[1]}{2[0]}{3}{2[1]}".format(sE, s1, s2, f'{sS}'.join(lines[1:]))
+			rpMessageSend += f"<a href=tg://user?id={me.id}>{nick}</a> {s1[0]}{comand[detail[0]]}{s1[1]} <a href=tg://user?id={user.id}>{user.first_name}</a>{detail[1]}"
+			if len(lines) >= 2: rpMessageSend += "\n{0} {1[0]}С репликой:{1[1]} {2[0]}{3}{2[1]}".format(sE, s2, s3, sS.join(lines[1:]))
 			if rezjim == 1:
 				return await utils.answer(message, rpMessageSend)
 			else:
-				return await message.respond(rpMessageSend)
+				return await message.respond(message, rpMessageSend)
 
 		except:  pass
+
+	def merge_dict(self, d1, d2):
+		d_all = {**d1, **d2}
+		for key in d_all:
+			d_all[key] = {**d1[key], **d_all[key]}
+		return d_all
