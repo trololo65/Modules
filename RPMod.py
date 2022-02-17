@@ -207,7 +207,7 @@ class RPMod(loader.Module):
 		if not args:
 			nicks[str(user.id)] = user.first_name
 			self.db.set('RPMod', 'rpnicks', nicks)
-			return await utils.answer(message, f"<b>Ник изменён на {user.first_name}</b>")
+			return await utils.answer(message, f"Ник пользователя <b>{str(user.id)}</b> изменён на '<b>{args}</b>'")
 		lst = []
 		nick = ''
 		for x in args:
