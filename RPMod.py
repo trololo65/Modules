@@ -198,7 +198,7 @@ class RPMod(loader.Module):
 		reply = await message.get_reply_message()
 		nicks = self.db.get('RPMod', 'rpnicks')
 		if args == '-l':
-			str_nicks = '• ' + '\n •'.join(' --- '.join([f'<code>{user_id}</code>', f'<b>{nick}</b>'] for user_id, nick in nicks.items()))
+			str_nicks = '• ' + '\n •'.join(' --- '.join([f'<code>{user_id}</code>', f'<b>{nick}</b>']) for user_id, nick in nicks.items())
 
 		if not reply:
 			user = await message.client.get_entity(message.sender_id)
