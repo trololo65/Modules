@@ -1,5 +1,5 @@
 from .. import loader, utils
-import asyncio, pytz, re
+import asyncio, pytz, re, telethon
 from telethon.tl.types import MessageEntityTextUrl
 import json as JSON
 from datetime import datetime, date, time
