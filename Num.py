@@ -249,6 +249,7 @@ class NumMod(loader.Module):
 			return await utils.answer(message, "❌ Неизвестный аргумент.")
 
 	async def watcher(self, message):
+		if not isinstance(message, telethon.tl.types.Message): return
 		filter_and_users = self.db.get("NumMod", "numfilter", {'users': [], 'filter': None, 'status': False})
 		user_id = str(message.sender_id)
 		if not filter_and_users['filter'] or not filter_and_users['status'] or user_id not in filter_and_users['users'] or message.is_private: return
