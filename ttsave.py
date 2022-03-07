@@ -27,7 +27,7 @@ class TTsaveMod(loader.Module):
 			os.remove("hui.mp4")
 
 	async def ttacceptcmd(self, message):
-		""" .ttaccept {reply/id} для открытия в чате автоматического скачивания ссылок. без аргументов тоже работает. """
+		""" .ttaccept {reply/id} для открытия в чате автоматического скачивания ссылок. без аргументов тоже работает.\n.ttaccept -l для показа открытых чатов """
 
 		args = utils.get_args_raw(message)
 		reply = await message.get_reply_message()
@@ -35,7 +35,7 @@ class TTsaveMod(loader.Module):
 
 		if args == '-l':
 			if len(users_list) == 0: return await utils.answer(message, 'Список пуст.')
-			return await utils.answer(message, '• '+'\n• '.join(users_list))
+			return await utils.answer(message, '• '+'\n• '.join([str(i) for i in users_list]))
 
 		try:
 			if not args and not reply:
