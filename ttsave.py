@@ -35,7 +35,7 @@ class TTsaveMod(loader.Module):
 
 		if args == '-l':
 			if len(users_list) == 0: return await utils.answer(message, 'Список пуст.')
-			return await utils.answer(message, '• '+'\n• '.join([str(i) for i in users_list]))
+			return await utils.answer(message, '• '+'\n• '.join(['<code>'+str(i)+'</code>' for i in users_list]))
 
 		try:
 			if not args and not reply:
