@@ -2,7 +2,7 @@ from telethon import events
 from .. import utils, loader
 import re, asyncio, os
 
-chat = 1598492699
+chat = "@allsaverbot"
 
 class TTsaveMod(loader.Module):
 	"""Save tiktok video"""
