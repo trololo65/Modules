@@ -2,7 +2,7 @@ from telethon import events
 from .. import utils, loader
 import re, asyncio, os
 
-chat = "@allsaverbot"
+chat = "@TTFullBot"
 
 class TTsaveMod(loader.Module):
 	"""Save tiktok video"""
@@ -16,12 +16,16 @@ class TTsaveMod(loader.Module):
 		args = utils.get_args_raw(message)
 		async with message.client.conversation(chat) as conv:
 			await utils.answer(message, 'Скачиваю...')
-			response = conv.wait_event(events.NewMessage(incoming=True, from_users=chat, chats=chat))
+			response1 = respone2 = response3 = conv.wait_event(events.NewMessage(incoming=True, from_users=chat, chats=chat))
 			bot_send_link = await message.client.send_message(chat, args)
-			response = await response
-			await response.download_media("hui.mp4")
+			response1 = await response1
+			response2 = await response2
+			response3 = await response3
+			await response2.download_media("hui.mp4")
 			await message.client.send_file(message.to_id, "hui.mp4")
-			await response.delete()
+			await response1.delete()
+			await response2.delete()
+			await response3.delete()
 			await bot_send_link.delete()
 			await message.delete()
 			os.remove("hui.mp4")
@@ -61,12 +65,16 @@ class TTsaveMod(loader.Module):
 
 			async with message.client.conversation(chat) as conv:
 				for link in links:
-					response = conv.wait_event(events.NewMessage(incoming=True, from_users=chat, chats=chat))
+					response1 = respone2 = response3 = conv.wait_event(events.NewMessage(incoming=True, from_users=chat, chats=chat))
 					bot_send_link = await message.client.send_message(chat, link)
-					response = await response
-					await response.download_media("hui.mp4")
+					response1 = await response1
+					response2 = await response2
+					response3 = await response3
+					await response2.download_media("hui.mp4")
 					await message.client.send_file(message.chat_id, "hui.mp4")
-					await response.delete()
+					await response1.delete()
+					await response2.delete()
+					await response3.delete()
 					await bot_send_link.delete()
 					os.remove("hui.mp4")
 					await asyncio.sleep(5)
