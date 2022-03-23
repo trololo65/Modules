@@ -16,7 +16,7 @@ class TTsaveMod(loader.Module):
 		args = utils.get_args_raw(message)
 		async with message.client.conversation(chat) as conv:
 			await utils.answer(message, 'Скачиваю...')
-			response1 = respone2 = response3 = conv.wait_event(events.NewMessage(incoming=True, from_users=chat, chats=chat))
+			response1 = response2 = response3 = conv.wait_event(events.NewMessage(incoming=True, from_users=chat, chats=chat))
 			bot_send_link = await message.client.send_message(chat, args)
 			response1 = await response1
 			response2 = await response2
@@ -65,7 +65,7 @@ class TTsaveMod(loader.Module):
 
 			async with message.client.conversation(chat) as conv:
 				for link in links:
-					response1 = respone2 = response3 = conv.wait_event(events.NewMessage(incoming=True, from_users=chat, chats=chat))
+					response1 = response2 = response3 = conv.wait_event(events.NewMessage(incoming=True, from_users=chat, chats=chat))
 					bot_send_link = await message.client.send_message(chat, link)
 					response1 = await response1
 					response2 = await response2
