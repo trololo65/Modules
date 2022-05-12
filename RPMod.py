@@ -1,4 +1,5 @@
-# by: @trololo_1
+# meta developer: @trololo_1
+
 import subprocess
 try:
 	import emoji
