@@ -1,3 +1,5 @@
+# meta developer: @trololo_1
+
 from .. import utils, loader
 from asyncio import sleep
 
