@@ -1,3 +1,5 @@
+# meta developer: @trololo_1
+
 from .. import loader, utils
 import subprocess
 try:
