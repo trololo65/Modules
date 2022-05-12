@@ -1,3 +1,5 @@
+# meta developer: @trololo_1
+
 import asyncio
 import logging
 
