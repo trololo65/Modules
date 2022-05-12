@@ -1,5 +1,4 @@
-# by: Adi
-# Tg: @trololo_1
+# meta developer: @trololo_1
 # Github: trololo65
 import subprocess
 try:
