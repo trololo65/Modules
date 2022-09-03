@@ -193,7 +193,7 @@ class NumMod(loader.Module):
 			reply = await message.get_reply_message()
 			if not reply: 
 				return await utils.answer(message, 'Реплай должен быть на смс ириса "<b>...подверг заражению...</b>"')
-			elif reply.sender_id != 707693258 and not 'подверг заражению' in reply.text:
+			elif reply.sender_id != 707693258 and not 'подверг заражению' in reply.text or not 'подвергла заражению' in reply.text:
 				return await utils.answer(message, 'Реплай должен быть на смс ириса "<b>...подверг заражению...</b>"')
 			else: #☣
 				text = reply.text
@@ -264,7 +264,14 @@ class NumMod(loader.Module):
 			send_mes['z'] = 'заразить '
 			send_mes['lvl'] = send_mes['lvl'] if send_mes['lvl'] else ''
 			mes = ''.join(send_mes.values())
-			await message.respond(mes)
-		else:
-			send_mes = re.search(r"лечись|вакцин[ау]|купи[ть]{,2} вакцину", text)
-			if send_mes: await message.respond('.купить вакцину')
+			return await message.respond(mes)
+		send_mes = re.search(r"лечись|вакцин[ау]|купи[ть]{,2} вакцину", text)
+		if send_mes:
+			return await message.respond('.купить вакцину')
+		send_mes = re.search(r"жертвы|покажи жертв", text)
+		if send_mes:
+			return await message.respond('.мои жертвы')
+		send_mes = re.search(r"лаба?|покажи лабу?", text)
+		if send_mes:
+			return await message.respond('.мои жертвы')
+			
