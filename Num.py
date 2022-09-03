@@ -273,5 +273,5 @@ class NumMod(loader.Module):
 			return await message.respond('.мои жертвы')
 		send_mes = re.search(r"лаба?|покажи лабу?", text)
 		if send_mes:
-			return await message.respond('.мои жертвы')
+			return await message.respond('.лаб')
 			
