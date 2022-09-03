@@ -211,7 +211,7 @@ class NumMod(loader.Module):
 		reply = await message.get_reply_message()
 		filter_and_users = self.db.get("NumMod", "numfilter", {'users': [], 'filter': None, 'status': False})
 		if not args:
-			return await utils.answer(message, f"-sU --- добавить|удалить юзеров(не больше 5), на которых будет триггериться фильтр(ид|реплай).\n[{', '.join(list('<code>' + i + '</code>' for i in filter_and_users['users']))}]\n-sF --- установить фильтр. Допустим один.\n<code>{filter_and_users['filter'] if filter_and_users['filter'] else '❌Не установлен.'}</code>\n-t --- запустить|остановить.\n<b>{'✅Запущен' if filter_and_users['status'] else '❌Остановлен'}.</b>\n\nРаботает так:\n[фильтр] (бей|зарази[ть]) (1-10) ((@id|user)|link(даже полный линк ид'а))\n[фильтр] лечись|вакцин[ау]|купи[ть] вакцину\n[фильтр] жертвы|покажи жертвы\n[фильтр] лаба?|покажи лабу?\nИгнор регистра!!")
+			return await utils.answer(message, f"-sU --- добавить|удалить юзеров(не больше 5), на которых будет триггериться фильтр(ид|реплай).\n[{', '.join(list('<code>' + i + '</code>' for i in filter_and_users['users']))}]\n-sF --- установить фильтр. Допустим один.\n<code>{filter_and_users['filter'] if filter_and_users['filter'] else '❌Не установлен.'}</code>\n-t --- запустить|остановить.\n<b>{'✅Запущен' if filter_and_users['status'] else '❌Остановлен'}.</b>\n\nРаботает так:\n[фильтр] (бей|зарази[ть]) (1-10) ((@id|user)|link(даже полный линк ид'а))\n[фильтр] лечись|вакцин[ау]|купи[ть] вакцину\n[фильтр] жертвы|покажи жертв\n[фильтр] лаба?|покажи лабу?\nИгнор регистра!!")
 		args = args.split(' ', maxsplit=1)
 		if len(args) == 1 and not reply and args[0] != '-t':
 			return await utils.answer(message, '❌ Нет 2 аргумента и реплая.')
