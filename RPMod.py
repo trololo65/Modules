@@ -16,18 +16,21 @@ conf_default = {
 				'2': [False, '<i>курсив</i>', '<i>', '</i>'], 
 				'3': [False, '<u>подчеркнутый</u>', '<u>', '</u>'],
 				'4': [False, '<s>зачёркнутый</s>', '<s>', '</s>'],
+				'5': [False, '<tg-spoiler>скрытый</tg-spoiler>', '<tg-spoiler>', '</tg-spoiler>'],
 			},
 			'-s2':{												# СТИЛИ для "С репликой"
 				'1': [True, '<b>жирный</b>', '<b>', '</b>'], 
 				'2': [False, '<i>курсив</i>', '<i>', '</i>'], 
 				'3': [False, '<u>подчеркнутый</u>', '<u>', '</u>'],
-				'4': [False, '<s>зачёркнуто</s>', '<s>', '</s>']
+				'4': [False, '<s>зачёркнуто</s>', '<s>', '</s>'],
+				'5': [False, '<tg-spoiler>скрытый</tg-spoiler>', '<tg-spoiler>', '</tg-spoiler>'],
 			}, 
 			'-s3':{ 											# СТИЛИ для реплики
 				'1': [False, '<b>жирный</b>', '<b>', '</b>'], 
 				'2': [False, '<i>курсив</i>', '<i>', '</i>'], 
 				'3': [False, '<u>подчеркнутый</u>', '<u>', '</u>'],
-				'4': [False, '<s>зачёркнутый</s>', '<s>', '</s>']
+				'4': [False, '<s>зачёркнутый</s>', '<s>', '</s>'],
+				'5': [False, '<tg-spoiler>скрытый</tg-spoiler>', '<tg-spoiler>', '</tg-spoiler>'],
 			},
 			'-sE':{ 											# ЭМОДЗИ перед репликой
 				'1': [True, '💬'], 
@@ -207,9 +210,9 @@ class RPMod(loader.Module):
 		else:
 			user = await message.client.get_entity(reply.sender_id)
 		if not args:
-			nicks[str(user.id)] = user.first_name
+			if str(user.id) in nicks: nicks.pop(str(user.id))
 			self.db.set('RPMod', 'rpnicks', nicks)
-			return await utils.answer(message, f"Ник пользователя <b>{str(user.id)}</b> изменён на '<b>{args}</b>'")
+			return await utils.answer(message, f"Ник пользователя <b>{str(user.id)}</b> изменён на '<b>{user.first_name}</b>'")
 		lst = []
 		nick = ''
 		for x in args:
