@@ -355,7 +355,7 @@ class RPMod(loader.Module):
 			await utils.answer(message, 'Что то пошло не так..')
 
 	async def useracceptcmd(self, message):
-		""" Добавление/удаление пользователей/чатов, разрешенным использовать ваши команды.\n .useraccept {id/reply}/nДля добавления чата используй без реплая и аргументов."""
+		""" Добавление/удаление пользователей/чатов, разрешенным использовать ваши команды.\n .useraccept {id/reply}\nДля добавления чата используй без реплая и аргументов."""
 		reply = await message.get_reply_message()
 		args = utils.get_args_raw(message)
 		userA = self.db.get('RPMod', 'useraccept')
