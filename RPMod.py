@@ -24,9 +24,9 @@
 
 import subprocess
 try:
-	import emoji
+	import emoji # max work version 1.7.0
 except:
-	mod_inst = subprocess.Popen("pip install emoji", shell=True) 
+	mod_inst = subprocess.Popen("pip install emoji==1.7.0", shell=True) 
 	mod_inst.wait()
 	import emoji
 from .. import loader, utils
