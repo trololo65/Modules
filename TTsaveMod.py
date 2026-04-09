@@ -37,7 +37,7 @@ class TTsaveMod(loader.Module):
 	async def setbotcmd(self, message):
 		"""use: .setbot чтобы установить бота для скачивания."""
 		args = utils.get_args_raw(message)
-	   
+		
 		try:
 			bot = await message.client.get_entity(args)
 		except:
