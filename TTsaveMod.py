@@ -5,6 +5,8 @@ import re, asyncio, os
 from datetime import datetime
 
 default_chat = "@SaveAsBot"
+MODE_FORWARD = "forward"
+MODE_DOWNLOAD = "download"
 
 class TTsaveMod(loader.Module):
     """Save tiktok video"""
@@ -15,7 +17,11 @@ class TTsaveMod(loader.Module):
         if not self.db.get('TTsaveMod', 'chat', False):
             self.db.set('TTsaveMod', 'chat', self.default_chat)
 
-    async def save_video(self, message, url=None, delete_source_message=True):
+    def _send_mode(self):
+        m = self.db.get('TTsaveMod', 'send_mode', MODE_FORWARD)
+        return m if m in (MODE_FORWARD, MODE_DOWNLOAD) else MODE_FORWARD
+
+    async def save_video(self, message, url=None):
         """save video from tiktok. url: ссылка; для .ttsave можно не передавать (берётся из аргументов команды)."""
         if url is not None:
             args = str(url).strip()
@@ -24,43 +30,62 @@ class TTsaveMod(loader.Module):
         if not args:
             await utils.answer(message, "Нет ссылки.")
             return False
+        dest = message.peer_id
         chat = self.db.get('TTsaveMod', 'chat')
-        async with message.client.conversation(chat) as conv:
-            await utils.answer(message, 'Скачиваю...')
-            bot_send_link = await conv.send_message(args)
-            response1 = await conv.get_response()
-            response2 = await conv.get_response()
+        mode = self._send_mode()
+        status_msg = await message.respond('Скачиваю...')
 
-            # Определяем, в каком из response пришло видео
-            video_response, other_response = None, None
-            if hasattr(response1, "media") and response1.media is not None:
-                if getattr(response1.media, "document", None) or getattr(response1.media, "video", None):
-                    video_response = response1
-                    other_response = response2
-            if video_response is None and hasattr(response2, "media") and response2.media is not None:
-                if getattr(response2.media, "document", None) or getattr(response2.media, "video", None):
-                    video_response = response2
-                    other_response = response1
-            if video_response is None:
-                await utils.answer(message, "Не удалось получить видео.")
+        async def erase_status():
+            try:
+                await status_msg.delete()
+            except Exception:
+                pass
+
+        try:
+            async with message.client.conversation(chat) as conv:
+                bot_send_link = await conv.send_message(args)
+                response1 = await conv.get_response()
+                response2 = await conv.get_response()
+
+                # Определяем, в каком из response пришло видео
+                video_response, other_response = None, None
+                if hasattr(response1, "media") and response1.media is not None:
+                    if getattr(response1.media, "document", None) or getattr(response1.media, "video", None):
+                        video_response = response1
+                        other_response = response2
+                if video_response is None and hasattr(response2, "media") and response2.media is not None:
+                    if getattr(response2.media, "document", None) or getattr(response2.media, "video", None):
+                        video_response = response2
+                        other_response = response1
+                if video_response is None:
+                    await erase_status()
+                    await message.respond("Не удалось получить видео.")
+                    await response1.delete()
+                    await response2.delete()
+                    await bot_send_link.delete()
+                    return False
+
+                if mode == MODE_FORWARD:
+                    await video_response.forward_to(dest)
+                    await response1.delete()
+                    await response2.delete()
+                    await bot_send_link.delete()
+                    await erase_status()
+                    return True
+
+                now_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+                filename = f"{now_time}.mp4"
+                await video_response.download_media(filename)
                 await response1.delete()
                 await response2.delete()
                 await bot_send_link.delete()
-                if delete_source_message:
-                    await message.delete()
-                return False
-
-            now_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-            filename = f"{now_time}.mp4"
-            await video_response.download_media(filename)
-            await message.client.send_file(message.to_id, filename)
-            await response1.delete()
-            await response2.delete()
-            await bot_send_link.delete()
-            if delete_source_message:
-                await message.delete()
-            os.remove(filename)
-            return True
+                await erase_status()
+                await message.client.send_file(dest, filename)
+                os.remove(filename)
+                return True
+        except Exception:
+            await erase_status()
+            raise
 
     async def setbotcmd(self, message):
         """use: .setbot чтобы установить бота для скачивания."""
@@ -73,15 +98,36 @@ class TTsaveMod(loader.Module):
         self.db.set('TTsaveMod', 'bot', str(bot.id))
         await utils.answer(message, f"<b>бот <code>{bot.username}</code> установлен.</b>")
 
+    async def ttsendmodecmd(self, message):
+        """.ttsendmode forward|download — пересылка с бота (по умолчанию) или скачивание и отправка. Без аргументов — текущий режим."""
+        raw = (utils.get_args_raw(message) or "").strip().lower()
+        if not raw:
+            cur = self._send_mode()
+            tip = "пересылка с бота" if cur == MODE_FORWARD else "скачивание и отправка"
+            return await utils.answer(
+                message,
+                f"<b>Сейчас:</b> {tip}\n<code>.ttsendmode forward|download</code>",
+            )
+        if raw in ("forward", "пересылка", "fwd", "f"):
+            self.db.set("TTsaveMod", "send_mode", MODE_FORWARD)
+            return await utils.answer(message, "<b>Режим:</b> пересылка с бота.")
+        if raw in ("download", "скачивание", "скачать", "dl", "d"):
+            self.db.set("TTsaveMod", "send_mode", MODE_DOWNLOAD)
+            return await utils.answer(message, "<b>Режим:</b> скачивание и отправка.")
+        return await utils.answer(message, "<code>.ttsendmode forward|download</code>")
+
     async def ttsavecmd(self, message):
         """.ttsave {link}"""
 
         args = utils.get_args_raw(message)
         save_video = await self.save_video(message)
         if save_video:
-            await utils.answer(message, f"<b>видео успешно скачано.</b>")
+            if self._send_mode() == MODE_FORWARD:
+                await utils.answer(message, "<b>видео переслано.</b>")
+            else:
+                await utils.answer(message, "<b>видео успешно отправлено.</b>")
         else:
-            await utils.answer(message, f"<b>не удалось скачать видео.</b>")
+            await utils.answer(message, "<b>не удалось скачать видео.</b>")
 
     async def ttacceptcmd(self, message):
         """ .ttaccept {reply/id} для открытия в чате автоматического скачивания ссылок. без аргументов тоже работает.\n.ttaccept -l для показа открытых чатов """
@@ -116,20 +162,8 @@ class TTsaveMod(loader.Module):
             links = re.findall(r'((?:https?://)?v[mt]\.tiktok\.com/[A-Za-z0-9_]+/?)', message.raw_text)
             if len(links) == 0: return
 
-            all_ok = True
             for link in links:
-                ok = await self.save_video(
-                    message,
-                    url=link,
-                    delete_source_message=False,
-                )
-                if not ok:
-                    all_ok = False
+                await self.save_video(message, url=link)
                 await asyncio.sleep(5)
-            if all_ok and links:
-                try:
-                    await message.delete()
-                except Exception:
-                    pass
         except Exception:
             pass
