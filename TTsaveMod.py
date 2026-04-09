@@ -19,20 +19,50 @@ class TTsaveMod(loader.Module):
     async def save_video(self, message):
         """save video from tiktok"""
         args = utils.get_args_raw(message)
-        async with message.client.conversation(self.db.get('TTsaveMod', 'chat')) as conv:
+        chat = self.db.get('TTsaveMod', 'chat')
+        ev = events.NewMessage(incoming=True, from_users=chat, chats=chat)
+        async with message.client.conversation(chat) as conv:
             await utils.answer(message, 'Скачиваю...')
-            response1, response2 = [conv.wait_event(events.NewMessage(incoming=True, from_users=self.db.get('TTsaveMod', 'chat'), chats=self.db.get('TTsaveMod', 'chat'))) for i in range(2)]
-            bot_send_link = await message.client.send_message(self.db.get('TTsaveMod', 'chat'), args)
-            response1 = await response1
-            response2 = await response2
+            t1 = asyncio.create_task(conv.wait_event(ev))
+            t2 = asyncio.create_task(conv.wait_event(ev))
+            try:
+                bot_send_link = await message.client.send_message(chat, args)
+                response1, response2 = await asyncio.gather(t1, t2)
+            except BaseException:
+                for t in (t1, t2):
+                    if not t.done():
+                        t.cancel()
+                await asyncio.gather(t1, t2, return_exceptions=True)
+                raise
+
+            # Определяем, в каком из response пришло видео
+            video_response, other_response = None, None
+            if hasattr(response1, "media") and response1.media is not None:
+                if getattr(response1.media, "document", None) or getattr(response1.media, "video", None):
+                    video_response = response1
+                    other_response = response2
+            if video_response is None and hasattr(response2, "media") and response2.media is not None:
+                if getattr(response2.media, "document", None) or getattr(response2.media, "video", None):
+                    video_response = response2
+                    other_response = response1
+            if video_response is None:
+                await utils.answer(message, "Не удалось получить видео.")
+                await response1.delete()
+                await response2.delete()
+                await bot_send_link.delete()
+                await message.delete()
+                return False
+
             now_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-            await response2.download_media(f"{now_time}.mp4")
-            await message.client.send_file(message.to_id, f"{now_time}.mp4")
+            filename = f"{now_time}.mp4"
+            await video_response.download_media(filename)
+            await message.client.send_file(message.to_id, filename)
             await response1.delete()
             await response2.delete()
             await bot_send_link.delete()
             await message.delete()
-            os.remove(f"{now_time}.mp4")
+            os.remove(filename)
+            return True
 
     async def setbotcmd(self, message):
         """use: .setbot чтобы установить бота для скачивания."""
