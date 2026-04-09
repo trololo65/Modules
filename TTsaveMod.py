@@ -1,6 +1,5 @@
 # meta developer: @trololo_1
 
-from telethon import events
 from .. import utils, loader
 import re, asyncio, os
 from datetime import datetime
@@ -16,24 +15,21 @@ class TTsaveMod(loader.Module):
         if not self.db.get('TTsaveMod', 'chat', False):
             self.db.set('TTsaveMod', 'chat', self.default_chat)
 
-    async def save_video(self, message):
-        """save video from tiktok"""
-        args = utils.get_args_raw(message)
+    async def save_video(self, message, url=None, delete_source_message=True):
+        """save video from tiktok. url: ссылка; для .ttsave можно не передавать (берётся из аргументов команды)."""
+        if url is not None:
+            args = str(url).strip()
+        else:
+            args = utils.get_args_raw(message).strip()
+        if not args:
+            await utils.answer(message, "Нет ссылки.")
+            return False
         chat = self.db.get('TTsaveMod', 'chat')
-        ev = events.NewMessage(incoming=True, from_users=chat, chats=chat)
         async with message.client.conversation(chat) as conv:
             await utils.answer(message, 'Скачиваю...')
-            t1 = asyncio.create_task(conv.wait_event(ev))
-            t2 = asyncio.create_task(conv.wait_event(ev))
-            try:
-                bot_send_link = await message.client.send_message(chat, args)
-                response1, response2 = await asyncio.gather(t1, t2)
-            except BaseException:
-                for t in (t1, t2):
-                    if not t.done():
-                        t.cancel()
-                await asyncio.gather(t1, t2, return_exceptions=True)
-                raise
+            bot_send_link = await conv.send_message(args)
+            response1 = await conv.get_response()
+            response2 = await conv.get_response()
 
             # Определяем, в каком из response пришло видео
             video_response, other_response = None, None
@@ -50,7 +46,8 @@ class TTsaveMod(loader.Module):
                 await response1.delete()
                 await response2.delete()
                 await bot_send_link.delete()
-                await message.delete()
+                if delete_source_message:
+                    await message.delete()
                 return False
 
             now_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
@@ -60,7 +57,8 @@ class TTsaveMod(loader.Module):
             await response1.delete()
             await response2.delete()
             await bot_send_link.delete()
-            await message.delete()
+            if delete_source_message:
+                await message.delete()
             os.remove(filename)
             return True
 
@@ -118,7 +116,20 @@ class TTsaveMod(loader.Module):
             links = re.findall(r'((?:https?://)?v[mt]\.tiktok\.com/[A-Za-z0-9_]+/?)', message.raw_text)
             if len(links) == 0: return
 
+            all_ok = True
             for link in links:
-                save_video = await self.save_video(message)
+                ok = await self.save_video(
+                    message,
+                    url=link,
+                    delete_source_message=False,
+                )
+                if not ok:
+                    all_ok = False
                 await asyncio.sleep(5)
-        except: pass
+            if all_ok and links:
+                try:
+                    await message.delete()
+                except Exception:
+                    pass
+        except Exception:
+            pass
