@@ -38,7 +38,7 @@ class TTsaveMod(loader.Module):
 		"""use: .setbot чтобы установить бота для скачивания."""
 		args = utils.get_args_raw(message)
 	   
-	   	try:
+		try:
 			bot = await message.client.get_entity(args)
 		except:
 			return await utils.answer(message, f"<b>бот не найден.</b>")
