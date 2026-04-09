@@ -4,33 +4,56 @@ from telethon import events
 from .. import utils, loader
 import re, asyncio, os
 
-chat = "@TTFullBot"
+default_chat = "@SaveAsBot"
 
 class TTsaveMod(loader.Module):
 	"""Save tiktok video"""
 	strings = {'name': 'TTsaveMod'}	
 	async def client_ready(self, client, db):
 		self.db = db
+		self.default_chat = default_chat
+		if not self.db.get('TTsaveMod', 'chat', False):
+			self.db.set('TTsaveMod', 'chat', self.default_chat)
+
+
+	async def save_video(self, message):
+		"""save video from tiktok"""
+		args = utils.get_args_raw(message)
+		async with message.client.conversation(self.db.get('TTsaveMod', 'chat')) as conv:
+			await utils.answer(message, 'Скачиваю...')
+			response1, response2 = [conv.wait_event(events.NewMessage(incoming=True, from_users=self.db.get('TTsaveMod', 'chat'), chats=self.db.get('TTsaveMod', 'chat'))) for i in range(2)]
+			bot_send_link = await message.client.send_message(self.db.get('TTsaveMod', 'chat'), args)
+			response1 = await response1
+			response2 = await response2
+			now_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+			await response2.download_media(f"{now_time}.mp4")
+			await message.client.send_file(message.to_id, f"{now_time}.mp4")
+			await response1.delete()
+			await response2.delete()
+			await bot_send_link.delete()
+			await message.delete()
+			os.remove(f"{now_time}.mp4")
+
+	async def setbotcmd(self, message):
+		"""use: .setbot чтобы установить бота для скачивания."""
+		args = utils.get_args_raw(message)
+	   
+	   	try:
+			bot = await message.client.get_entity(args)
+		except:
+			return await utils.answer(message, f"<b>бот не найден.</b>")
+		self.db.set('TTsaveMod', 'bot', str(bot.id))
+		await utils.answer(message, f"<b>бот <code>{bot.username}</code> установлен.</b>")
 	
 	async def ttsavecmd(self, message):
 		""".ttsave {link}"""
 
 		args = utils.get_args_raw(message)
-		async with message.client.conversation(chat) as conv:
-			await utils.answer(message, 'Скачиваю...')
-			response1, response2, response3 = [conv.wait_event(events.NewMessage(incoming=True, from_users=chat, chats=chat)) for i in range(3)]
-			bot_send_link = await message.client.send_message(chat, args)
-			response1 = await response1
-			response2 = await response2
-			response3 = await response3
-			await response2.download_media("hui.mp4")
-			await message.client.send_file(message.to_id, "hui.mp4")
-			await response1.delete()
-			await response2.delete()
-			await response3.delete()
-			await bot_send_link.delete()
-			await message.delete()
-			os.remove("hui.mp4")
+		save_video = await self.save_video(message)
+		if save_video:
+			await utils.answer(message, f"<b>видео успешно скачано.</b>")
+		else:
+			await utils.answer(message, f"<b>не удалось скачать видео.</b>")
 
 	async def ttacceptcmd(self, message):
 		""" .ttaccept {reply/id} для открытия в чате автоматического скачивания ссылок. без аргументов тоже работает.\n.ttaccept -l для показа открытых чатов """
@@ -65,19 +88,7 @@ class TTsaveMod(loader.Module):
 			links = re.findall(r'((?:https?://)?v[mt]\.tiktok\.com/[A-Za-z0-9_]+/?)', message.raw_text)
 			if len(links) == 0: return
 
-			async with message.client.conversation(chat) as conv:
-				for link in links:
-					response1, response2, response3 = [conv.wait_event(events.NewMessage(incoming=True, from_users=chat, chats=chat)) for i in range(3)]
-					bot_send_link = await message.client.send_message(chat, link)
-					response1 = await response1
-					response2 = await response2
-					response3 = await response3
-					await response2.download_media("hui.mp4")
-					await message.client.send_file(message.chat_id, "hui.mp4")
-					await response1.delete()
-					await response2.delete()
-					await response3.delete()
-					await bot_send_link.delete()
-					os.remove("hui.mp4")
-					await asyncio.sleep(5)
+			for link in links:
+				save_video = await self.save_video(message)
+				await asyncio.sleep(5)
 		except: pass
